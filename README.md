@@ -55,4 +55,5 @@ input_text = st.text_input('**Chat with me**', key='text')
 
 ## Reference 
 
+[Github - Welcome to Streamlit](https://github.com/streamlit/streamlit)
 [Streamlit cheat sheet](https://daniellewisdl-streamlit-cheat-sheet-app-ytm9sg.streamlit.app/)
