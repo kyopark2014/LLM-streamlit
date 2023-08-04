@@ -1,4 +1,4 @@
-# LLM-streamlit
+# LLM을 위한 Streamlit 환경 구성
 
 ## Cloud9 실행환경
 
