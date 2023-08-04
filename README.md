@@ -53,3 +53,6 @@ st.subheader('this is subheader')
 input_text = st.text_input('**Chat with me**', key='text')
 ```
 
+## Reference 
+
+[Streamlit cheat sheet](https://daniellewisdl-streamlit-cheat-sheet-app-ytm9sg.streamlit.app/)
