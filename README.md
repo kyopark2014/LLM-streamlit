@@ -2,7 +2,9 @@
 
 ## Cloud9 실행환경
 
-Cloud9 환경 생성후 streamlit을 설치합니다.
+[Cloud9 console](https://ap-northeast-2.console.aws.amazon.com/cloud9control/home?region=ap-northeast-2#/)에서 [Create environment]를 선택하여 Cloud9을 생성합니다.
+
+Cloud9 생성후 아래처럼 streamlit을 설치합니다.
 
 ```text
 pip install streamlit
