@@ -16,12 +16,6 @@ pip install streamlit && pip install streamlit_chat
 
 ![image](https://github.com/kyopark2014/LLM-streamlit/assets/52392004/1a451dd0-92d3-465e-80e2-144c0fa65d8b)
 
-소스를 다운로드합니다.
-
-```text
-git clone https://github.com/kyopark2014/LLM-streamlit && cd LLM-streamlit/app
-```
-
 ### EBS 크기 변경
 
 아래와 같이 스크립트를 다운로드 합니다. 
@@ -36,6 +30,13 @@ chmod a+rx resize.sh && ./resize.sh 100
 ```
 
 ### Bedrock 환경 설정
+
+소스를 다운로드합니다.
+
+```text
+git clone https://github.com/kyopark2014/LLM-streamlit && cd LLM-streamlit/app
+```
+
 
 ```text
 wget https://preview.documentation.bedrock.aws.dev/Documentation/SDK/bedrock-python-sdk.zip
