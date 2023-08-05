@@ -33,6 +33,22 @@ streamlit run hello.py
 
 ## Bedrock 환경 설정
 
+```text
+!wget https://preview.documentation.bedrock.aws.dev/Documentation/SDK/bedrock-python-sdk.zip
+!unzip bedrock-python-sdk.zip -d bedrock-sdk
+!rm -rf bedrock-python-sdk.zip
+pip install -U ./bedrock-sdk/botocore-1.29.162-py3-none-any.whl
+pip install -U ./bedrock-sdk/boto3-1.26.162-py3-none-any.whl
+pip install -U ./bedrock-sdk/awscli-1.27.162-py3-none-any.whl
+pip install -U langchain
+rm -rf bedrock-sdk
+```
+
+pydantic을 다운 grade합니다. ([참고](https://stackoverflow.com/questions/76614379/roo-validator-error-when-importing-langchain-text-splitter-python))
+```text
+pip install pydantic==1.10.2
+```
+
 ## 예제
 
 title, head, subheader는 아래와 같이 사용합니다.
