@@ -14,22 +14,11 @@ pip install streamlit
 
 ![image](https://github.com/kyopark2014/LLM-streamlit/assets/52392004/1a451dd0-92d3-465e-80e2-144c0fa65d8b)
 
-streamlit을 실행합니다.
+소스를 다운로드합니다.
 
 ```text
-streamlit run hello.py
+git clone https://github.com/kyopark2014/LLM-streamlit && cd LLM-streamlit/app
 ```
-
-아래의 External URL을 브라우저를 이용해 접속합니다.
-
-```text
-  You can now view your Streamlit app in your browser.
-
-  Network URL: http://172.31.46.12:8501
-  External URL: http://3.39.22.83:8501
-```
-
-이후, hello.py를 열어서 수정을 한 후에 저정하면 됩니다. 결과 업데이트는 브라우저를 reflash하면 됩니다.
 
 ## Bedrock 환경 설정
 
@@ -48,6 +37,23 @@ pydantic을 다운 grade합니다. ([참고](https://stackoverflow.com/questions
 ```text
 pip install pydantic==1.10.2
 ```
+
+streamlit을 실행합니다.
+
+```text
+streamlit run hello.py
+```
+
+아래의 External URL을 브라우저를 이용해 접속합니다.
+
+```text
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://172.31.46.12:8501
+  External URL: http://3.39.22.83:8501
+```
+
+이후, hello.py를 열어서 수정을 한 후에 저정하면 됩니다. 결과 업데이트는 브라우저를 reflash하면 됩니다.
 
 ## 예제
 
