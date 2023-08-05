@@ -75,6 +75,49 @@ st.subheader('this is subheader')
 input_text = st.text_input('**Chat with me**', key='text')
 ```
 
+## Troubleshooting: EC2에서 Bedrock과 LangChain 사용시 문제점
+
+- 2023년 7월 기준으로 Bedrock용 라이브러리는 python3.7기준(amazon linux)로 설정되어 있습니다.
+- LangChaing은 python3.7 기준에서 0.0.27까지만 지원하므로 최신 라이브러리는 거의 사용할 수 없으모로 python3.9 사용이 권고됩니다.
+- EC2(Amazon linux)로 python3.9를 추가로 설치하고 python 버전을 확인하였을대 3.9로 잘 설치되었으나 pip install lanagchin으로 langchain 설치시에 여전히 python 3.7 버전을 인식함
+- 따라서, EC2(Amazon linux)에서 Bedrock과 LangChain 동시 사용이 불가합니다.
+- EC2(Ubuntu)로 설치시에 python 3.10이 기본설치되지만, Bedrock installer가 python 3.7 기준이라서 설치가 불가하여 Ubuntu에서는 Bedrock 사용이 불가합니다.
+- container로 만들어서 사용이 가능할것으로 보여지지만, Cloud9 환경 사용이 불가하여 Bedrock 정식 버전이 출시 되기 까지는 사용이 불가할것으로 보여집니다. 
+
+```text
+sudo yum install gcc openssl-devel bzip2-devel libffi-devel 
+cd /opt 
+sudo tar xzf Python-3.9.16.tgz 
+sudo wget https://www.python.org/ftp/python/3.9.16/Python-3.9.16.tgz 
+sudo ./configure --enable-optimizations 
+sudo make altinstall 
+sudo rm -f /opt/Python-3.9.16.tgz 
+python3.9 -V 
+
+- python3.9를 enable
+python3.9 -m venv env
+
+- 경로 확인
+which python3.9
+/opt/Python-3.9.16/env/bin/python3.9
+
+- 확인된 경로로 update
+sudo update-alternatives --install /usr/bin/python python /opt/Python-3.9.16/env/bin/python3.9 1 
+sudo update-alternatives --config python
+
+There is 1 program that provides 'python'.
+
+  Selection    Command
+-----------------------------------------------
+*+ 1           /opt/Python-3.9.16/env/bin/python3.9
+
+Enter to keep the current selection[+], or type selection number: 1
+
+- 버전확인
+python --version
+python3 --version
+```
+
 ## Reference 
 
 [Github - Welcome to Streamlit](https://github.com/streamlit/streamlit)
