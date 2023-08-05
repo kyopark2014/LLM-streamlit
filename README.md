@@ -7,7 +7,7 @@
 Cloud9 생성후 아래처럼 streamlit을 설치합니다.
 
 ```text
-pip install streamlit
+pip install streamlit && pip install streamlit_chat
 ```
 
 [EC2 Console](https://ap-northeast-2.console.aws.amazon.com/ec2/home?region=ap-northeast-2#Instances:instanceState=running)에서 Cloud9이 설치된 EC2를 찾은 후에, 아래와 같이 Security Group의 inbound rule에서 8501을 Open합니다.
