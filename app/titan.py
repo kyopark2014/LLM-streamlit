@@ -1,38 +1,65 @@
+import os
+import sys
 import json
 import boto3
-import streamlit as st
 import uuid
-import anthropic
-import logging
+import streamlit as st
 from streamlit_chat import message
-from boto3.dynamodb.conditions import Key
-import datetime
-import os
 
-# create a unique widget
-if 'key' not in st.session_state:
-    st.session_state.key = str(uuid.uuid4())
+from langchain import PromptTemplate, SagemakerEndpoint
+from langchain.llms.sagemaker_endpoint import LLMContentHandler
+from langchain.text_splitter import CharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.docstore.document import Document
+from langchain.chains.summarize import load_summarize_chain
 
-key = os.environ['AWS_ACCESS_KEY_ID']
-secret = os.environ['AWS_SECRET_ACCESS_KEY']
-region = os.environ['AWS_DEFAULT_REGION']
-falcon_endpoint = os.environ['falcon_endpoint_name']
-llama7_endpoint_name = os.environ['llama7_endpoint_name']
-llama70_endpoint_name = os.environ['llama70_endpoint_name']
-comprehend = boto3.client('comprehend',region_name='us-east-1',aws_access_key_id=key,aws_secret_access_key=secret)
-ddb = boto3.resource('dynamodb',region_name='us-east-1',aws_access_key_id=key,aws_secret_access_key=secret)
-dynamodb = boto3.client('dynamodb',region_name='us-east-1',aws_access_key_id=key,aws_secret_access_key=secret)
-table = ddb.Table('genai-chat-history')
-bedrock = boto3.client('bedrock',region_name=region, aws_access_key_id=key, aws_secret_access_key=secret)
-sm_west = boto3.client('runtime.sagemaker',region_name="us-west-2", aws_access_key_id=key, aws_secret_access_key=secret)
+from langchain.agents import create_csv_agent
+from langchain.agents.agent_types import AgentType
+from langchain.llms.bedrock import Bedrock
+from langchain.chains.question_answering import load_qa_chain
+
+from langchain.vectorstores import FAISS
+from langchain.indexes import VectorstoreIndexCreator
+from langchain.document_loaders import CSVLoader
+from langchain.embeddings import BedrockEmbeddings
+from langchain.indexes.vectorstore import VectorStoreIndexWrapper
+from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
+from langchain.vectorstores import OpenSearchVectorSearch
+
+module_path = "."
+sys.path.append(os.path.abspath(module_path))
+
+from utils import bedrock
+
+def call_bedrock_titan(prompt_text):
+    bedrock_region = "us-west-2" 
+    bedrock_config = {
+        "region_name":bedrock_region,
+        "endpoint_url":"https://prod.us-west-2.frontend.bedrock.aws.dev"
+    }
+    
+    boto3_bedrock = bedrock.get_bedrock_client(
+        region=bedrock_config["region_name"],
+        url_override=bedrock_config["endpoint_url"])
+        
+    modelInfo = boto3_bedrock.list_foundation_models()    
+    print('models: ', modelInfo)
+    
+    parameters = {
+        "maxTokenCount":512,
+        "stopSequences":[],
+        "temperature":0,
+        "topP":0.9
+    }
+    
+    model_id = "amazon.titan-tg1-large"
+    llm = Bedrock(model_id=model_id, client=boto3_bedrock, model_kwargs=parameters)
+
+    result_text = llm(prompt_text)
+    return result_text
 
 
-if 'sessionID' not in st.session_state:
-    st.session_state['sessionID'] = str(uuid.uuid4())
-if 'prevText' not in st.session_state:
-    st.session_state['prevText'] = None
-if 'count' not in st.session_state:
-    st.session_state['count'] = 0
 
 st.set_page_config(page_title="GenAI ChatAway", page_icon="flashlight")
 
@@ -46,82 +73,38 @@ st.markdown(
     - Source code available in the [GitLab repo](https://gitlab.aws.dev/dabounds/gen-ai-demos) and associated [Documentation](https://gitlab.aws.dev/dabounds/gen-ai-demos/-/tree/development/static/Documentation).
     """)
 
+
+
 st.sidebar.header("GenAI ChatAway")
 
 fms = ['Bedrock Claude 2', 'Bedrock Claude Instant', 'SageMaker Meta Llama-2-7b-chat', 'SageMaker Meta Llama-2-70b-chat', 'SageMaker Falcon', 'Bedrock Titan']
 default_model = fms.index('Bedrock Claude Instant')
+
+
+st.title('this is title')
+st.header('this is header')
+st.subheader('this is subheader')
+
+
+if 'sessionID' not in st.session_state:
+    st.session_state['sessionID'] = str(uuid.uuid4())
+if 'prevText' not in st.session_state:
+    st.session_state['prevText'] = None
+if 'count' not in st.session_state:
+    st.session_state['count'] = 0
+    
+
+models = {
+    "bedrock titan" : call_bedrock_titan,
+}
 
 model = ''
 model = st.sidebar.selectbox(
     'Select a FM',
     options=fms, index=default_model)
 st.markdown("# Chat with "+model)
-
-
-def get_old_chats():
-    res = table.query(
-    KeyConditionExpression=Key('session_id').eq(str(st.session_state.sessionID))
-    )
-    return res['Items']
-
-
-def store_chat(turn, question, answer):
-    now = datetime.datetime.now()
-
-    # Format the date and time string
-    formatted_date_time = str(now.strftime("%Y-%m-%d %H:%M:%S"))
-    dynamodb.put_item(
-        TableName="genai-chat-history",
-        Item={
-            'session_id': {'S': str(st.session_state.sessionID)},
-            'model': {'S': str(model)},
-            'turn': {'S': str(turn)},
-            'question': {'S': str(question)},
-            'answer': {'S': str(answer)},
-            'datetime': {'S': str(formatted_date_time)}
-            }
-        )
-
-
-def call_anthropic(query):
-    c = anthropic.Client(ant_api_key)
-    resp = c.completion(
-        prompt=anthropic.HUMAN_PROMPT+query+anthropic.AI_PROMPT,
-        stop_sequences=[anthropic.HUMAN_PROMPT],
-        model="claude-2",
-        max_tokens_to_sample=1024,
-    )
-    return resp['completion']
-
-
-def call_bedrock_titan(prompt_text, max_token_count=1024, temperature=1, top_p=1, stop_sequences=[]):
-    model_id = "amazon.titan-tg1-large"
-    body_string = "{\"inputText\":\"" + f"{prompt_text}" +\
-                    "\",\"textGenerationConfig\":{" +\
-                    "\"maxTokenCount\":" + f"{max_token_count}" +\
-                    ",\"temperature\":" + f"{temperature}" +\
-                    ",\"topP\":" + f"{top_p}" +\
-                    ",\"stopSequences\":" + f"{stop_sequences}" +\
-                    "}}"
-    body = bytes(body_string, 'utf-8')
-    response = bedrock.invoke_model(
-        modelId = model_id,
-        contentType = "application/json",
-        accept = "application/json",
-        body = body)
-    response_lines = response['body'].readlines()
-    json_str = response_lines[0].decode('utf-8')
-
-    json_obj = json.loads(json_str)
-    result_text = json_obj['results'][0]['outputText']
-    return result_text
-
-
-models = {
-    "bedrock titan" : call_bedrock_titan,
-}
-
-
+    
+    
 def GetAnswers(query):
     if query == "cancel":
         answer = 'It was swell chatting with you. Goodbye for now'
@@ -135,8 +118,7 @@ def GetAnswers(query):
     else:
         func = models[model.lower()]
         answer = func(query)   
-    return answer          
-
+    return answer   
 
 st.write("**Instructions:** \n - Type your query in the search bar \n - Only last five chats displayed for brevity \n")
 input_text = st.text_input('**Chat with me**', key='text')
@@ -151,15 +133,9 @@ if input_text != '':
     result = result.replace("$","\$")
     st.session_state.prevText = result
     message(result, key=str(uuid.uuid4()))
-    if int(st.session_state.count) <= 5:
-        old_chats = get_old_chats()
-        if old_chats:
-            for chat in old_chats:
-                message(chat['question'], is_user=True, key=str(uuid.uuid4()))
-                message(chat['answer'], key=str(uuid.uuid4()))
+
     st.session_state.count = int(st.session_state.count) + 1
-    store_chat(st.session_state.count, input_text, result)
-    p_text = call_anthropic('Generate three prompts to query the text: '+ result)
+    p_text = call_bedrock_titan('Generate three prompts to query the text: '+ result)
     p_text1 = []
     p_text2 = ''
     if p_text != '':
@@ -171,3 +147,4 @@ if input_text != '':
         p_summary = p_text2
     st.sidebar.markdown('### Suggested prompts for further insights \n\n' + 
             p_summary)
+
