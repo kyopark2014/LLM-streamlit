@@ -34,10 +34,10 @@ streamlit run hello.py
 ## Bedrock 환경 설정
 
 ```text
-!wget https://preview.documentation.bedrock.aws.dev/Documentation/SDK/bedrock-python-sdk.zip
-!unzip bedrock-python-sdk.zip -d bedrock-sdk
-!rm -rf bedrock-python-sdk.zip
-pip install -U ./bedrock-sdk/botocore-1.29.162-py3-none-any.whl
+wget https://preview.documentation.bedrock.aws.dev/Documentation/SDK/bedrock-python-sdk.zip
+unzip bedrock-python-sdk.zip -d bedrock-sdk
+rm -rf bedrock-python-sdk.zip
+pip install -U ./bedrock-sdk/botocore-1.29.162-py3-none-any.whl -t .
 pip install -U ./bedrock-sdk/boto3-1.26.162-py3-none-any.whl
 pip install -U ./bedrock-sdk/awscli-1.27.162-py3-none-any.whl
 pip install -U langchain
