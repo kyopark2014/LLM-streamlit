@@ -59,7 +59,7 @@ pip install streamlit && pip install streamlit_chat
 아래와 같이 streamlit을 실행합니다.
 
 ```text
-streamlit run hello.py
+streamlit run bedrock.py
 ```
 
 아래의 External URL을 브라우저를 이용해 접속합니다.
@@ -71,7 +71,9 @@ streamlit run hello.py
   External URL: http://3.39.22.83:8501
 ```
 
-이후, bedrock.py를 열어서 수정을 한 후에 저정하면 됩니다. 결과 업데이트는 브라우저를 reflash하면 됩니다.
+이후, bedrock.py를 열어서 수정을 한 후에 저정하면 됩니다. 결과 업데이트는 브라우저를 reflash하면 됩니다. 실행화면은 아래와 같습니다.
+
+![image](https://github.com/kyopark2014/LLM-streamlit/assets/52392004/aa63a2c2-942e-4234-9928-d051f70e3a63)
 
 
 ## 예제
