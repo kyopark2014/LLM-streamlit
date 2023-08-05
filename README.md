@@ -1,4 +1,4 @@
-# LLM을 위한 Streamlit 환경 구성 
+# Amazon Bedrock을 위한 Streamlit 환경 구성 
 
 ## 설치 및 실행
 
