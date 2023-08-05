@@ -1,6 +1,8 @@
 # LLM을 위한 Streamlit 환경 구성 
 
-## Cloud9 실행환경
+## 설치 및 실행
+
+### Cloud9 실행환경
 
 [Cloud9 console](https://ap-northeast-2.console.aws.amazon.com/cloud9control/home?region=ap-northeast-2#/)에서 [Create environment]를 선택하여 Cloud9을 생성합니다.
 
@@ -20,7 +22,20 @@ pip install streamlit && pip install streamlit_chat
 git clone https://github.com/kyopark2014/LLM-streamlit && cd LLM-streamlit/app
 ```
 
-## Bedrock 환경 설정
+### EBS 크기 변경
+
+아래와 같이 스크립트를 다운로드 합니다. 
+
+```text
+curl https://raw.githubusercontent.com/kyopark2014/technical-summary/main/resize.sh -o resize.sh
+```
+
+이후 아래 명령어로 용량을 100G로 변경합니다.
+```text
+chmod a+rx resize.sh && ./resize.sh 100
+```
+
+### Bedrock 환경 설정
 
 ```text
 wget https://preview.documentation.bedrock.aws.dev/Documentation/SDK/bedrock-python-sdk.zip
@@ -38,7 +53,9 @@ pydantic을 다운 grade합니다. ([참고](https://stackoverflow.com/questions
 pip install pydantic==1.10.2
 ```
 
-streamlit을 실행합니다.
+### Streamlit 실행 
+
+아래와 같이 streamlit을 실행합니다.
 
 ```text
 streamlit run hello.py
@@ -53,10 +70,12 @@ streamlit run hello.py
   External URL: http://3.39.22.83:8501
 ```
 
-이후, hello.py를 열어서 수정을 한 후에 저정하면 됩니다. 결과 업데이트는 브라우저를 reflash하면 됩니다.
+이후, bedrock.py를 열어서 수정을 한 후에 저정하면 됩니다. 결과 업데이트는 브라우저를 reflash하면 됩니다.
+
 
 ## 예제
 
+### Title
 title, head, subheader는 아래와 같이 사용합니다.
 
 ```python
@@ -69,7 +88,7 @@ st.subheader('this is subheader')
 
 ![image](https://github.com/kyopark2014/LLM-streamlit/assets/52392004/e0f94a88-8f58-4ebd-9e5f-966085621114)
 
-## 입력창
+### 입력창
 
 ```python
 input_text = st.text_input('**Chat with me**', key='text')

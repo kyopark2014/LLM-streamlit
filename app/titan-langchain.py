@@ -1,22 +1,38 @@
-import streamlit as st
+import os
+import sys
+import json
 import boto3
 import uuid
-import sys
-
-import os
-module_path = "."
-sys.path.append(os.path.abspath(module_path))
-from utils import bedrock
-
-import boto3
-import langchain
-import json
-
-
+import streamlit as st
 from streamlit_chat import message
 
+from langchain import PromptTemplate, SagemakerEndpoint
+from langchain.llms.sagemaker_endpoint import LLMContentHandler
+from langchain.text_splitter import CharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.docstore.document import Document
+from langchain.chains.summarize import load_summarize_chain
 
-def call_bedrock_titan(prompt_text, max_token_count=1024, temperature=1, top_p=1, stop_sequences=[]):
+from langchain.agents import create_csv_agent
+from langchain.agents.agent_types import AgentType
+from langchain.llms.bedrock import Bedrock
+from langchain.chains.question_answering import load_qa_chain
+
+from langchain.vectorstores import FAISS
+from langchain.indexes import VectorstoreIndexCreator
+from langchain.document_loaders import CSVLoader
+from langchain.embeddings import BedrockEmbeddings
+from langchain.indexes.vectorstore import VectorStoreIndexWrapper
+from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
+from langchain.vectorstores import OpenSearchVectorSearch
+
+module_path = "."
+sys.path.append(os.path.abspath(module_path))
+
+from utils import bedrock
+
+def call_bedrock_titan(prompt_text):
     bedrock_region = "us-west-2" 
     bedrock_config = {
         "region_name":bedrock_region,
@@ -29,28 +45,18 @@ def call_bedrock_titan(prompt_text, max_token_count=1024, temperature=1, top_p=1
         
     modelInfo = boto3_bedrock.list_foundation_models()    
     print('models: ', modelInfo)
-
-
+    
+    parameters = {
+        "maxTokenCount":512,
+        "stopSequences":[],
+        "temperature":0,
+        "topP":0.9
+    }
+    
     model_id = "amazon.titan-tg1-large"
-    body_string = "{\"inputText\":\"" + f"{prompt_text}" +\
-                    "\",\"textGenerationConfig\":{" +\
-                    "\"maxTokenCount\":" + f"{max_token_count}" +\
-                    ",\"temperature\":" + f"{temperature}" +\
-                    ",\"topP\":" + f"{top_p}" +\
-                    ",\"stopSequences\":" + f"{stop_sequences}" +\
-                    "}}"
-                    
-    body = bytes(body_string, 'utf-8')
-    response = boto3_bedrock.invoke_model(
-        modelId = model_id,
-        contentType = "application/json",
-        accept = "application/json",
-        body = body)
-    response_lines = response['body'].readlines()
-    json_str = response_lines[0].decode('utf-8')
+    llm = Bedrock(model_id=model_id, client=boto3_bedrock, model_kwargs=parameters)
 
-    json_obj = json.loads(json_str)
-    result_text = json_obj['results'][0]['outputText']
+    result_text = llm(prompt_text)
     return result_text
 
 
