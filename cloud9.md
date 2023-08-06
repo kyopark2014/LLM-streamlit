@@ -1,0 +1,90 @@
+# Cloud9에 Streamlit 설치를 위한 환경 설정
+
+여기서는 Streamlit을 Cloud9에서 사용하기 위한 설정방법을 가이드합니다.
+
+## EC2 생성 
+
+[EC2 console](https://ap-northeast-2.console.aws.amazon.com/ec2/home?region=ap-northeast-2#LaunchInstances:)에 접속하여 [Name]으로 "streamlit"으로 입력하고, OS로 기본값인 "Amazon linux"를 선택합니다.  
+
+[Amazon Machine Image (AMI)]은 최신 AMI를 선택합니다. 여기서는 기본값인 "Amazon Linux 2023 AMI"를 선택하였습니다.
+
+적절한 [Instance type]을 선택합니다. 여기서는 "m5-2xlarge"를 선택하였습니다.
+
+[Key pair]는 아래와 같이 "Proceed without a key pair"를 선택합니다.
+![image](https://github.com/kyopark2014/LLM-streamlit/assets/52392004/7e60cbcd-2d0a-48ad-b5f9-cee5a7fb67e1)
+
+편의상 [Configure storage]를 200GiB로 선택합니다. 
+
+이후 [Launch instance]를 선택합니다.
+
+## Cloud9 생성
+
+[Cloud9 Console](https://ap-northeast-2.console.aws.amazon.com/cloud9control/home?region=ap-northeast-2#/create)에서 아래와 같이 [Name]을 입력하고, [Existing compute]를 선택한 후에 [Copy key to clipboard]를 선택하여 ssh key를 복사합니다. 여기서는 Name으로 "cloud9-gpu"라고 입력하였습니다. 
+
+![noname](https://user-images.githubusercontent.com/52392004/216656333-24d9347a-8564-4018-93ec-0e38a0e7ade2.png)
+
+[EC2 Console](https://ap-northeast-2.console.aws.amazon.com/ec2/home?region=ap-northeast-2#Instances:)로 이동하여, 생성한 EC2를 선택하고 먼저, "Public IPv4 DNS"의 값을 확인합니다. 여기서는, "13.124.191.23"입니다. 이후 아래처럼 생성한 인스턴스를 선택하고, [Connect]를 선택합니다. 
+
+![noname](https://user-images.githubusercontent.com/52392004/216788704-be942dd1-7a80-4552-b312-829fa96e0768.png)
+
+
+
+
+
+
+아래와 같이 [Connect to instances]에서 [Connect]를 선택합니다. 
+
+![noname](https://user-images.githubusercontent.com/52392004/216788766-4ce84802-618b-455e-b76f-51938a3dc0d5.png)
+
+
+기존의 authorized_keys를 삭제합니다.
+
+```java
+rm .ssh/authorized_keys
+```
+
+이제 authorized_keys에 Cloud9에서 복사한 ssh key를 입력합니다. 
+
+```java
+echo <Paste the Copied Key> >> ~/.ssh/authorized_keys
+```
+
+
+아래와 같이 정상적으로 입력되었는지 확인합니다.
+
+```java
+cat ~/.ssh/authorized_keys
+```
+
+여기서는 아래처럼 확인할 수 있습니다. 
+
+![noname](https://user-images.githubusercontent.com/52392004/216789211-ed1ceb16-7f82-4416-b04e-8145d59b8936.png)
+
+
+아래와 같이 pip python2.7과 node.js를 설치합니다.
+
+다시 Cloud9으로 와서 [User]에 "ubuntu"라고 입력하고, 생성한 EC2의 Public IP를 아래처럼 입력합니다. 이후 하단의 [Create]를 선택하여 Cloud9을 선택합니다. 
+
+![noname](https://user-images.githubusercontent.com/52392004/216789657-ad99aa12-e531-4566-a02e-f1adae46e4c9.png)
+
+
+
+아래와 같이 [Environment](https://ap-northeast-2.console.aws.amazon.com/cloud9control/home?region=ap-northeast-2#/)에서 생성한 "cloud9-gpu"에서 [Open]을 선택하여 cloud9으로 진입합니다. 
+
+![noname](https://user-images.githubusercontent.com/52392004/216733393-1635c558-35a8-4ba6-b177-fb4bea3ac701.png)
+
+아래와 같은 설치 화면이 나오면 [Next]를 선택합니다.
+
+![image](https://user-images.githubusercontent.com/52392004/216662019-28f065d7-88a5-4ad5-8182-9362751a63d9.png)
+
+아래와 같이 Installer에서도 [Next]를 선택하여 필요한 패키지를 설치합니다. 수분정도 소요됩니다. 
+
+![image](https://user-images.githubusercontent.com/52392004/216662159-5ff76f78-7beb-4365-871e-dbbd4d23e912.png)
+
+설치가 완료되면 아래와 같이 터미널로 접속합니다. 
+
+![noname](https://user-images.githubusercontent.com/52392004/216664493-8fa9c618-8ab1-4ea1-8563-74a94ee27aef.png)
+
+
+
+![image](https://github.com/kyopark2014/LLM-streamlit/assets/52392004/753debfd-ea3a-4ec9-bfad-38174158362d)
