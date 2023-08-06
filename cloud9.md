@@ -58,15 +58,29 @@ cat ~/.ssh/authorized_keys
 ![noname](https://user-images.githubusercontent.com/52392004/216789211-ed1ceb16-7f82-4416-b04e-8145d59b8936.png)
 
 
-아래와 같이 pip python2.7과 node.js를 설치합니다.
+아래와 같이 [node.js를 설치](https://docs.aws.amazon.com/ko_kr/sdk-for-javascript/v2/developer-guide/setting-up-node-on-ec2-instance.html)합니다.
 
-다시 Cloud9으로 와서 [User]에 "ubuntu"라고 입력하고, 생성한 EC2의 Public IP를 아래처럼 입력합니다. 이후 하단의 [Create]를 선택하여 Cloud9을 선택합니다. 
+```text
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+. ~/.nvm/nvm.sh
+nvm install --lts
+node -e "console.log('Running Node.js ' + process.version)"
+```
+
+
+아래와 같이 pip python2.7을 설치합니다.
+
+[찾는중...]
+
+
+
+다시 Cloud9으로 와서 [User]에 "ec2-user"라고 입력하고, 생성한 EC2의 Public IP를 아래처럼 입력합니다. 이후 하단의 [Create]를 선택하여 Cloud9을 선택합니다. 
 
 ![noname](https://user-images.githubusercontent.com/52392004/216789657-ad99aa12-e531-4566-a02e-f1adae46e4c9.png)
 
 
 
-아래와 같이 [Environment](https://ap-northeast-2.console.aws.amazon.com/cloud9control/home?region=ap-northeast-2#/)에서 생성한 "cloud9-gpu"에서 [Open]을 선택하여 cloud9으로 진입합니다. 
+아래와 같이 [Environment](https://ap-northeast-2.console.aws.amazon.com/cloud9control/home?region=ap-northeast-2#/)에서 생성한 "streamlit"에서 [Open]을 선택하여 cloud9으로 진입합니다. 
 
 ![noname](https://user-images.githubusercontent.com/52392004/216733393-1635c558-35a8-4ba6-b177-fb4bea3ac701.png)
 
