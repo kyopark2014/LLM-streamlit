@@ -4,6 +4,7 @@ import json
 import boto3
 import uuid
 import streamlit as st
+from streamlit_chat import message
 
 module_path = "."
 sys.path.append(os.path.abspath(module_path))
