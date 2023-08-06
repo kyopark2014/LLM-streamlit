@@ -1,20 +1,14 @@
-import streamlit as st
+import os
+import sys
+import json
 import boto3
 import uuid
-import sys
+import streamlit as st
 
-import os
 module_path = "."
 sys.path.append(os.path.abspath(module_path))
+
 from utils import bedrock
-
-import boto3
-import langchain
-import json
-
-
-from streamlit_chat import message
-
 
 def call_bedrock_titan(prompt_text, max_token_count=1024, temperature=1, top_p=1, stop_sequences=[]):
     bedrock_region = "us-west-2" 
