@@ -2,6 +2,8 @@
 
 여기서는 Streamlit을 Cloud9에서 사용하기 위한 설정방법을 가이드합니다.
 
+=> Cloud9이 python2.7을 반드시 필요로하는데 Amazon Linux에서 설치하는 방법을 못찾아서 헤메고 있음 (Aug.6 2023)
+
 ## EC2 생성 
 
 [EC2 console](https://ap-northeast-2.console.aws.amazon.com/ec2/home?region=ap-northeast-2#LaunchInstances:)에 접속하여 [Name]으로 "streamlit"으로 입력하고, OS로 기본값인 "Amazon linux"를 선택합니다.  
