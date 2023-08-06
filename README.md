@@ -140,6 +140,14 @@ python --version
 python3 --version
 ```
 
+추가적으로 버전 변경
+[AWS cloud9 pip install goes to python 2.7 instead of 3.6](https://stackoverflow.com/questions/60076259/aws-cloud9-pip-install-goes-to-python-2-7-instead-of-3-6)d에 따라 아래와 같이 설치합니다.
+
+```text
+unalias python
+sudo python3 -m pip install --upgrade pip
+```
+
 ## Reference 
 
 [Github - Welcome to Streamlit](https://github.com/streamlit/streamlit)
