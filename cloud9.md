@@ -19,22 +19,19 @@
 
 ## Cloud9 생성
 
-[Cloud9 Console](https://ap-northeast-2.console.aws.amazon.com/cloud9control/home?region=ap-northeast-2#/create)에서 아래와 같이 [Name]을 입력하고, [Existing compute]를 선택한 후에 [Copy key to clipboard]를 선택하여 ssh key를 복사합니다. 여기서는 Name으로 "cloud9-gpu"라고 입력하였습니다. 
+[Cloud9 Console](https://ap-northeast-2.console.aws.amazon.com/cloud9control/home?region=ap-northeast-2#/create)에서 아래와 같이 [Name]을 입력하고, [Existing compute]를 선택한 후에 [Copy key to clipboard]를 선택하여 ssh key를 복사합니다. 여기서는 Name으로 "streamlit"라고 입력하였습니다. 
 
-![noname](https://user-images.githubusercontent.com/52392004/216656333-24d9347a-8564-4018-93ec-0e38a0e7ade2.png)
-
-[EC2 Console](https://ap-northeast-2.console.aws.amazon.com/ec2/home?region=ap-northeast-2#Instances:)로 이동하여, 생성한 EC2를 선택하고 먼저, "Public IPv4 DNS"의 값을 확인합니다. 여기서는, "13.124.191.23"입니다. 이후 아래처럼 생성한 인스턴스를 선택하고, [Connect]를 선택합니다. 
-
-![noname](https://user-images.githubusercontent.com/52392004/216788704-be942dd1-7a80-4552-b312-829fa96e0768.png)
+![noname](https://github.com/kyopark2014/LLM-streamlit/assets/52392004/a9e30612-06bb-464d-9e47-8e0df29f9036)
 
 
+[EC2 Console](https://ap-northeast-2.console.aws.amazon.com/ec2/home?region=ap-northeast-2#Instances:)로 이동하여, 생성한 EC2를 선택하고 먼저, "Public IPv4 DNS"의 값을 확인합니다. 여기서는, "3.38.175.246"입니다. 이후 아래처럼 생성한 인스턴스를 선택하고, [Connect]를 선택합니다. 
 
-
+![image](https://github.com/kyopark2014/LLM-streamlit/assets/52392004/f4057a4a-b024-4b65-8152-14835fcb5191)
 
 
 아래와 같이 [Connect to instances]에서 [Connect]를 선택합니다. 
 
-![noname](https://user-images.githubusercontent.com/52392004/216788766-4ce84802-618b-455e-b76f-51938a3dc0d5.png)
+![image](https://github.com/kyopark2014/LLM-streamlit/assets/52392004/3994c9b5-6a3d-40a8-9650-601c3cfa6ed0)
 
 
 기존의 authorized_keys를 삭제합니다.
