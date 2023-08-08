@@ -11,6 +11,7 @@ import base64
 import uuid
 import string
 import os
+import sys
 
 module_path = "."
 sys.path.append(os.path.abspath(module_path))
