@@ -89,14 +89,12 @@ st.sidebar.header("GenAI Agile Guru")
 model = 'Anthropic Claude'
 
 def GetAnswers(query):
-    if model.lower() == 'anthropic claude':  
-        generated_text = call_bedrock_titan('Create 5 agile scrum user stories and acceptance criteria for each user story in '+language+' for '+ query.strip("query:"))
-        if generated_text != '':
-            generated_text = generated_text.replace("$","\$")
-            us_answer = str(generated_text)
-        else:
-            us_answer = 'Claude did not find an answer to your question, please try again'   
-    return us_answer                       
+    generated_text = call_bedrock_titan('Create 5 agile scrum user stories and acceptance criteria for each user story in '+language+' for '+ query.strip("query:"))
+    if generated_text != '':
+        generated_text = generated_text.replace("$","\$")
+        us_answer = str(generated_text)
+    else:
+        us_answer = 'The model did not find an answer to your question, please try again'   
 
 st.write("**Instructions:** \n - Type an epic story \n - You will see user stories, data model, api specs, and BDD scenarios automatically generated for your epic \n")
 
