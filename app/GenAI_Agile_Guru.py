@@ -89,7 +89,9 @@ st.sidebar.header("GenAI Agile Guru")
 model = 'Anthropic Claude'
 
 def GetAnswers(query):
-    generated_text = call_bedrock_titan('Create 5 agile scrum user stories and acceptance criteria for each user story in '+language+' for '+ query.strip("query:"))
+    question = 'Create 5 agile scrum user stories and acceptance criteria for each user story in '+language+' for '+ query.strip("query:")
+    print('question: ', question)
+    generated_text = call_bedrock_titan(question)
     if generated_text != '':
         generated_text = generated_text.replace("$","\$")
         us_answer = str(generated_text)
