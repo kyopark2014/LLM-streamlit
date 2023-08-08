@@ -7,7 +7,6 @@ import datetime
 from io import BytesIO
 from PIL import Image
 import numpy as np
-import matplotlib.pyplot as plt
 import base64
 import uuid
 import ai21
