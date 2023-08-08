@@ -18,27 +18,27 @@ sys.path.append(os.path.abspath(module_path))
 
 from utils import bedrock
 
+bedrock_region = "us-west-2" 
+bedrock_config = {
+    "region_name":bedrock_region,
+    "endpoint_url":"https://prod.us-west-2.frontend.bedrock.aws.dev"
+}
+    
+boto3_bedrock = bedrock.get_bedrock_client(
+    region=bedrock_config["region_name"],
+    url_override=bedrock_config["endpoint_url"]
+)
+#modelInfo = boto3_bedrock.list_foundation_models()    
+#print('models: ', modelInfo)
+model_id = "amazon.titan-tg1-large"
+
 def call_bedrock_titan(query):
     prompt_text = query
     max_token_count=1024
     temperature=1
     top_p=1
     stop_sequences=[]
-
-    bedrock_region = "us-west-2" 
-    bedrock_config = {
-        "region_name":bedrock_region,
-        "endpoint_url":"https://prod.us-west-2.frontend.bedrock.aws.dev"
-    }
     
-    boto3_bedrock = bedrock.get_bedrock_client(
-        region=bedrock_config["region_name"],
-        url_override=bedrock_config["endpoint_url"])
-        
-    #modelInfo = boto3_bedrock.list_foundation_models()    
-    #print('models: ', modelInfo)
-
-    model_id = "amazon.titan-tg1-large"
     body_string = "{\"inputText\":\"" + f"{prompt_text}" +\
                     "\",\"textGenerationConfig\":{" +\
                     "\"maxTokenCount\":" + f"{max_token_count}" +\
@@ -48,7 +48,7 @@ def call_bedrock_titan(query):
                     "}}"
                     
     body = bytes(body_string, 'utf-8')
-    print('body: ', body)
+    print('prompt_text: ', prompt_text)
     response = boto3_bedrock.invoke_model(
         modelId = model_id,
         contentType = "application/json",
