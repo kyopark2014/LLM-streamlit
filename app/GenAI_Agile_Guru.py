@@ -132,6 +132,7 @@ if input_text != '':
         if us_answer:
             st.write("**User stories for your epic**")
             st.write(us_answer)
+    """
     with tab2:
         dm_generated_text = call_bedrock_titan('Create a data model in '+language+' for each of the user stories in '+str(us_answer))
         if dm_generated_text != '':
@@ -166,4 +167,4 @@ if input_text != '':
         if bd_answer:
             st.write("**BDD Scenarios for your user stories**")
             st.write(bd_answer)
-    
+    """
