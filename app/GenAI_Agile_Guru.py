@@ -9,9 +9,7 @@ from PIL import Image
 import numpy as np
 import base64
 import uuid
-import ai21
 import string
-import anthropic
 import os
 
 module_path = "."
