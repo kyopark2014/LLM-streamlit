@@ -34,7 +34,7 @@ model_id = "amazon.titan-tg1-large"
 
 def call_bedrock_titan(query):
     prompt_text = query
-    max_token_count=1024
+    max_token_count=4096 
     temperature=1
     top_p=1
     stop_sequences=[]
