@@ -144,7 +144,9 @@ if input_text != '':
             st.write("**Data model for your user stories**")    
             st.write(dm_answer)
     with tab3:
-        as_generated_text = call_bedrock_titan('Create microservices API specifications in '+language+' for each of the data models in '+ str(dm_answer))
+        request = 'Create microservices API specifications in '+language+' for each of the data models in '+ str(dm_answer)
+        print('request: ', request)
+        as_generated_text = call_bedrock_titan(request)
         if as_generated_text != '':
             as_generated_text = as_generated_text.replace("$","\$")
             as_answer = str(as_generated_text)
