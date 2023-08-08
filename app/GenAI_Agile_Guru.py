@@ -35,9 +35,8 @@ def call_bedrock_titan(query):
         region=bedrock_config["region_name"],
         url_override=bedrock_config["endpoint_url"])
         
-    modelInfo = boto3_bedrock.list_foundation_models()    
-    print('models: ', modelInfo)
-
+    #modelInfo = boto3_bedrock.list_foundation_models()    
+    #print('models: ', modelInfo)
 
     model_id = "amazon.titan-tg1-large"
     body_string = "{\"inputText\":\"" + f"{prompt_text}" +\
@@ -49,6 +48,7 @@ def call_bedrock_titan(query):
                     "}}"
                     
     body = bytes(body_string, 'utf-8')
+    print('body: ', body)
     response = boto3_bedrock.invoke_model(
         modelId = model_id,
         contentType = "application/json",
