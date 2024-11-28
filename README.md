@@ -1,5 +1,12 @@
 # Amazon Bedrock을 위한 Streamlit 환경 구성 
 
+아래 내용은 라이브러리등이 너무 오래돼서 아래를 참조하는것이 더 좋을것 같습니다.
+
+[CDK Example](https://github.com/aws-samples/kr-tech-blog-sample-code/tree/main/cdk_bedrock_rag_chatbot/lib)
+
+[Amazon Bedrock Knowledge base로 30분 만에 멀티모달 RAG 챗봇 구축하기 실전 가이드](https://aws.amazon.com/ko/blogs/tech/practical-guide-for-bedrock-kb-multimodal-chatbot/)
+
+
 ## 설치 및 실행
 
 ### Cloud9 실행환경
@@ -152,3 +159,4 @@ sudo python3 -m pip install --upgrade pip
 [Github - Welcome to Streamlit](https://github.com/streamlit/streamlit)
 
 [Streamlit cheat sheet](https://daniellewisdl-streamlit-cheat-sheet-app-ytm9sg.streamlit.app/)
+
