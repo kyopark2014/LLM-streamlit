@@ -80,12 +80,12 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     );
 
     // vpc
- /*   const vpc = new ec2.Vpc(this, `vpc-for-${projectName}`, {
+    const vpc = new ec2.Vpc(this, `vpc-for-${projectName}`, {
       vpcName: `vpc-for-${projectName}`,
       maxAzs: 1,
       cidr: "10.64.0.0/24",
-      natGateways: 1,
-      createInternetGateway: true,
+      // natGateways: 1,
+      // createInternetGateway: true,
       // subnetConfiguration: [
       //   {
       //     name: `public-subnet-for-${projectName}`,
@@ -102,9 +102,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     const publicSubnet = new ec2.PublicSubnet(this, `public-subnet-for-${projectName}`, {
       availabilityZone: vpc.availabilityZones[0],
       cidrBlock: vpc.vpcCidrBlock,
-      vpcId: vpc.vpcId
-      
-    }); */
+      vpcId: vpc.vpcId      
+    }); 
     
 /*
     const ec2SecurityGroup = new ec2.SecurityGroup(this, `ec2-sg-for-${projectName}`,
