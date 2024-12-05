@@ -116,7 +116,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // userData.addCommands(userDataScript);
 
     // EC2 instance
-    const appInstance = new ec2.Instance(this, `streamlit-for-${projectName}`, {
+  /*  const appInstance = new ec2.Instance(this, `streamlit-for-${projectName}`, {
       instanceType: new ec2.InstanceType('t2.small'), // m5.large
       associatePublicIpAddress: true,
       // machineImage: ec2Image,
@@ -135,7 +135,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       }],
       detailedMonitoring: true,
       instanceInitiatedShutdownBehavior: ec2.InstanceInitiatedShutdownBehavior.STOP,
-    });
+    }); */
 
     // new cdk.CfnOutput(this, `appUrl-for-${projectName}`, {
     //   value: `http://${appInstance.instancePublicIp}/`,
