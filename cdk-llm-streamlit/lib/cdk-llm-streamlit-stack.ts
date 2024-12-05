@@ -55,6 +55,28 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AmazonSSMPatchAssociation',
     });
 
+    const ssmPolicy = new iam.PolicyStatement({  
+      resources: ['*'],
+      actions: ['ssm:*'],
+    });       
+    const ssmmessagesPolicy = new iam.PolicyStatement({  
+      resources: ['*'],
+      actions: ['ssmmessages:*'],
+    });   
+    const ec2messagesPolicy = new iam.PolicyStatement({  
+      resources: ['*'],
+      actions: ['ec2messages:*'],
+    });  
+    const tagPolicy = new iam.PolicyStatement({  
+      resources: ['*'],
+      actions: ['tag:*'],
+    }); 
+    ec2Role.attachInlinePolicy( // for isengard
+      new iam.Policy(this, `ssm-policy-ec2-for-${projectName}`, {
+        statements: [ssmPolicy, ssmmessagesPolicy, ec2messagesPolicy, tagPolicy],
+      }),
+    );  
+
     const BedrockPolicy = new iam.PolicyStatement({  
       resources: ['*'],
       actions: ['bedrock:*'],
