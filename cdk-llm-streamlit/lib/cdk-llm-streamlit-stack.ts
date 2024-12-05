@@ -48,9 +48,12 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
         new iam.ServicePrincipal("bedrock.amazonaws.com"),
       )
     });
-    // ec2Role.addManagedPolicy({
-    //   managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
-    // });
+    ec2Role.addManagedPolicy({
+      managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AmazonSSMManagedInstanceCore',
+    });
+    ec2Role.addManagedPolicy({
+      managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AmazonSSMPatchAssociation',
+    });
 
     const BedrockPolicy = new iam.PolicyStatement({  
       resources: ['*'],
@@ -124,13 +127,13 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     lb.addListener({ externalPort: 80 });
 
     // EC2 instance
-    const appInstance = new ec2.Instance(this, `streamlit-for-${projectName}`, {
+    const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
       instanceType: new ec2.InstanceType('t2.small'), // m5.large
       // associatePublicIpAddress: true,
       // machineImage: ec2Image,
       // machineImage: ec2Image,
-      machineImage: new ec2.AmazonLinuxImage({ generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2 }),
-      instanceName: `streamlit-for-${projectName}`,
+      machineImage: new ec2.AmazonLinuxImage({ generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2023}),
+      instanceName: `app-for-${projectName}`,
       vpc: vpc,
       securityGroup: ec2SecurityGroup,
       role: ec2Role,
