@@ -80,22 +80,22 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     );
 
     // vpc
-    const vpc = new ec2.Vpc(this, `vpc-for-${projectName}`, {
+  /*  const vpc = new ec2.Vpc(this, `vpc-for-${projectName}`, {
       vpcName: `vpc-for-${projectName}`,
       maxAzs: 1,
       cidr: "10.64.0.0/24",
       // natGateways: 1,
       createInternetGateway: true,
-      // subnetConfiguration: [
-      //   {
-      //     name: `public-subnet-for-${projectName}`,
-      //     subnetType: ec2.SubnetType.PUBLIC
-      //   }, 
-      //   {
-      //     name: `private-subnet-for-${projectName}`,
-      //     subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
-      //   },
-      // ],
+      subnetConfiguration: [
+        {
+          name: `public-subnet-for-${projectName}`,
+          subnetType: ec2.SubnetType.PUBLIC
+        }, 
+        {
+          name: `private-subnet-for-${projectName}`,
+          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
+        },
+      ],
     });
 
     const ec2SecurityGroup = new ec2.SecurityGroup(this, `ec2-sg-for-${projectName}`,
@@ -111,12 +111,12 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       ec2.Peer.anyIpv4(),
       ec2.Port.tcp(80),
       'httpIpv4',
-    );
+    ); */
 
     // set AMI
-    const ec2Image = ec2.MachineImage.fromSsmParameter(
-      '/aws/service/canonical/ubuntu/server/focal/stable/current/amd64/hvm/ebs-gp2/ami-id'
-    );
+    // const ec2Image = ec2.MachineImage.fromSsmParameter(
+    //   '/aws/service/canonical/ubuntu/server/focal/stable/current/amd64/hvm/ebs-gp2/ami-id'
+    // );
     
     // set User Data
     // const userData = ec2.UserData.forLinux();
@@ -124,14 +124,14 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // userData.addCommands(userDataScript);
 
     // ELB
-    const lb = new elb.LoadBalancer(this, `lb-for-${projectName}`, {
-      vpc,
-      internetFacing: true,
-    });
-    lb.addListener({ externalPort: 80 });
+    // const lb = new elb.LoadBalancer(this, `lb-for-${projectName}`, {
+    //   vpc,
+    //   internetFacing: true,
+    // });
+    // lb.addListener({ externalPort: 80 });
 
     // EC2 instance
-    const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
+  /*  const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
       instanceType: new ec2.InstanceType('t2.small'), // m5.large
       // associatePublicIpAddress: true,
       // machineImage: ec2Image,
@@ -151,7 +151,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       }],
       detailedMonitoring: true,
       instanceInitiatedShutdownBehavior: ec2.InstanceInitiatedShutdownBehavior.STOP,
-    });
+    }); */
 
     // lb.addTarget(new elb.InstanceTarget(appInstance));
 
