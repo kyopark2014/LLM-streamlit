@@ -23,7 +23,17 @@ origin=origins.LoadBalancerV2Origin(fargate_service.load_balancer,
 
 CloudFront - ALB - EC2로 하면 외부에서 cloudfront의 domain으로 접속시 https로 접속하게 됩니다.
 
+## streamlit을 system으로 실행
+
+[Running streamlit as a System Service](https://medium.com/@stevenjlm/running-streamlit-on-amazon-ec2-with-https-f20e38fffbe7)와 같이 service로 사용합니다.
+
+
+
 ## 설치 및 실행
+
+
+
+
 
 ### Cloud9 실행환경
 
