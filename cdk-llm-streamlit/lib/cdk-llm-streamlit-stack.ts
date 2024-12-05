@@ -117,10 +117,12 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // userData.addCommands(userDataScript);
 
     // ELB
-    const lb = new elb.LoadBalancer(this, 'LB', {
+    const lb = new elb.LoadBalancer(this, `lb-for-${projectName}`, {
       vpc,
       internetFacing: true,
     });
+    lb.addListener({ externalPort: 80 });
+
     // EC2 instance
     const appInstance = new ec2.Instance(this, `streamlit-for-${projectName}`, {
       instanceType: new ec2.InstanceType('t2.small'), // m5.large
@@ -144,7 +146,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       instanceInitiatedShutdownBehavior: ec2.InstanceInitiatedShutdownBehavior.STOP,
     });
 
-    lb.addTarget(new elb.InstanceTarget(appInstance));
+    // lb.addTarget(new elb.InstanceTarget(appInstance));
 
     // new cdk.CfnOutput(this, `appUrl-for-${projectName}`, {
     //   value: `http://${appInstance.instancePublicIp}/`,
