@@ -111,9 +111,9 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     );
     
     // set User Data
-    const userData = ec2.UserData.forLinux();
-    const userDataScript = fs.readFileSync(path.join(__dirname, 'userdata.sh'), 'utf8');
-    userData.addCommands(userDataScript);
+    // const userData = ec2.UserData.forLinux();
+    // const userDataScript = fs.readFileSync(path.join(__dirname, 'userdata.sh'), 'utf8');
+    // userData.addCommands(userDataScript);
 
     // EC2 instance
     const appInstance = new ec2.Instance(this, `app-instance-for-${projectName}`, {
@@ -122,10 +122,10 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       vpc: vpc,
       securityGroup: ec2SecurityGroup,
       role: ec2Role,
-      userData: userData,
+      // userData: userData,
       blockDevices: [{
         deviceName: '/dev/xvda',
-        volume: ec2.BlockDeviceVolume.ebs(80, {
+        volume: ec2.BlockDeviceVolume.ebs(8, {
           deleteOnTermination: false,
           encrypted: true,
         }),
@@ -134,10 +134,10 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       instanceInitiatedShutdownBehavior: ec2.InstanceInitiatedShutdownBehavior.STOP,
     });
 
-    new cdk.CfnOutput(this, 'appUrl', {
-      value: `http://${appInstance.instancePublicIp}/`,
-      description: 'appUrl',
-      exportName: 'appUrl',
-    });
+    // new cdk.CfnOutput(this, `appUrl-for-${projectName}`, {
+    //   value: `http://${appInstance.instancePublicIp}/`,
+    //   description: 'appUrl',
+    //   exportName: 'appUrl',
+    // }); 
   }
 }
