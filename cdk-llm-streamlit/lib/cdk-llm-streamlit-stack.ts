@@ -80,7 +80,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     );
 
     // vpc
-  /*  const vpc = new ec2.Vpc(this, `vpc-for-${projectName}`, {
+    const vpc = new ec2.Vpc(this, `vpc-for-${projectName}`, {
       vpcName: `vpc-for-${projectName}`,
       maxAzs: 1,
       cidr: "10.64.0.0/24",
@@ -96,7 +96,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       //     subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
       //   },
       // ],
-    }); */
+    }); 
+    vpc.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
     //removalPolicy: cdk.RemovalPolicy.DESTROY,
   /*  const ec2SecurityGroup = new ec2.SecurityGroup(this, `ec2-sg-for-${projectName}`,
       {
