@@ -83,27 +83,29 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     const vpc = new ec2.Vpc(this, `vpc-for-${projectName}`, {
       vpcName: `vpc-for-${projectName}`,
       maxAzs: 1,
-      cidr: "10.64.0.0/24",
+      ipAddresses: ec2.IpAddresses.cidr("10.64.0.0/24"),
       // natGateways: 1,
       // createInternetGateway: true,
-      // subnetConfiguration: [
-      //   {
-      //     name: `public-subnet-for-${projectName}`,
-      //     subnetType: ec2.SubnetType.PUBLIC
-      //   }, 
-      //   {
-      //     name: `private-subnet-for-${projectName}`,
-      //     subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
-      //   },
-      // ],
+      subnetConfiguration: [
+        {
+          cidrMask: 24,
+          name: `public-subnet-for-${projectName}`,
+          subnetType: ec2.SubnetType.PUBLIC
+        }, 
+        {
+          cidrMask: 24,
+          name: `private-subnet-for-${projectName}`,
+          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
+        },
+      ],
     }); 
     vpc.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
-    const publicSubnet = new ec2.PublicSubnet(this, `public-subnet-for-${projectName}`, {
-      availabilityZone: vpc.availabilityZones[0],
-      cidrBlock: vpc.vpcCidrBlock,
-      vpcId: vpc.vpcId      
-    }); 
+    // const publicSubnet = new ec2.PublicSubnet(this, `public-subnet-for-${projectName}`, {
+    //   availabilityZone: vpc.availabilityZones[0],
+    //   cidrBlock: vpc.vpcCidrBlock,
+    //   vpcId: vpc.vpcId      
+    // }); 
     
 /*
     const ec2SecurityGroup = new ec2.SecurityGroup(this, `ec2-sg-for-${projectName}`,
