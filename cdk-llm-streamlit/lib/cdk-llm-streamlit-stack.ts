@@ -133,12 +133,14 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // lb.addListener({ externalPort: 80 });
 
     // EC2 instance
-  /*  const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
+    const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
       instanceType: new ec2.InstanceType('t2.small'), // m5.large
       // associatePublicIpAddress: true,
       // machineImage: ec2Image,
       // machineImage: ec2Image,
-      machineImage: new ec2.AmazonLinuxImage({ generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2023}),
+      machineImage: new ec2.AmazonLinuxImage({
+        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2023
+      }),
       instanceName: `app-for-${projectName}`,
       vpc: vpc,
       securityGroup: ec2SecurityGroup,
@@ -153,7 +155,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       }],
       detailedMonitoring: true,
       instanceInitiatedShutdownBehavior: ec2.InstanceInitiatedShutdownBehavior.STOP,
-    }); */
+    }); 
 
     // lb.addTarget(new elb.InstanceTarget(appInstance));
 
