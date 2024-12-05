@@ -49,25 +49,13 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       )
     });
 
-    const ssmPolicy = new iam.PolicyStatement({  
+    const pvrePolicy = new iam.PolicyStatement({  
       resources: ['*'],
-      actions: ['ssm:*'],
+      actions: ['ssm:*', 'ssmmessages:*', 'ec2messages:*', 'tag:*'],
     });       
-    const ssmmessagesPolicy = new iam.PolicyStatement({  
-      resources: ['*'],
-      actions: ['ssmmessages:*'],
-    });   
-    const ec2messagesPolicy = new iam.PolicyStatement({  
-      resources: ['*'],
-      actions: ['ec2messages:*'],
-    });  
-    const tagPolicy = new iam.PolicyStatement({  
-      resources: ['*'],
-      actions: ['tag:*'],
-    }); 
     ec2Role.attachInlinePolicy( // for isengard
-      new iam.Policy(this, `ssm-policy-ec2-for-${projectName}`, {
-        statements: [ssmPolicy, ssmmessagesPolicy, ec2messagesPolicy, tagPolicy],
+      new iam.Policy(this, `pvre-policy-ec2-for-${projectName}`, {
+        statements: [pvrePolicy],
       }),
     );  
 
@@ -98,16 +86,16 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       cidr: "10.64.0.0/24",
       // natGateways: 1,
       createInternetGateway: true,
-      subnetConfiguration: [
-        {
-          name: `public-subnet-for-${projectName}`,
-          subnetType: ec2.SubnetType.PUBLIC
-        }, 
-        {
-          name: `private-subnet-for-${projectName}`,
-          subnetType: ec2.SubnetType.PRIVATE_ISOLATED
-        },
-      ],
+      // subnetConfiguration: [
+      //   {
+      //     name: `public-subnet-for-${projectName}`,
+      //     subnetType: ec2.SubnetType.PUBLIC
+      //   }, 
+      //   {
+      //     name: `private-subnet-for-${projectName}`,
+      //     subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
+      //   },
+      // ],
     });
 
     const ec2SecurityGroup = new ec2.SecurityGroup(this, `ec2-sg-for-${projectName}`,
