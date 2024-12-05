@@ -86,19 +86,19 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       cidr: "10.64.0.0/24",
       // natGateways: 1,
       createInternetGateway: true,
-      subnetConfiguration: [
-        {
-          name: `public-subnet-for-${projectName}`,
-          subnetType: ec2.SubnetType.PUBLIC
-        }, 
-        {
-          name: `private-subnet-for-${projectName}`,
-          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
-        },
-      ],
-    });
-
-    const ec2SecurityGroup = new ec2.SecurityGroup(this, `ec2-sg-for-${projectName}`,
+      // subnetConfiguration: [
+      //   {
+      //     name: `public-subnet-for-${projectName}`,
+      //     subnetType: ec2.SubnetType.PUBLIC
+      //   }, 
+      //   {
+      //     name: `private-subnet-for-${projectName}`,
+      //     subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
+      //   },
+      // ],
+    }); */
+    //removalPolicy: cdk.RemovalPolicy.DESTROY,
+  /*  const ec2SecurityGroup = new ec2.SecurityGroup(this, `ec2-sg-for-${projectName}`,
       {
         vpc: vpc,
         allowAllOutbound: true,
@@ -127,6 +127,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // const lb = new elb.LoadBalancer(this, `lb-for-${projectName}`, {
     //   vpc,
     //   internetFacing: true,
+    // removalPolicy: cdk.RemovalPolicy.DESTROY,
     // });
     // lb.addListener({ externalPort: 80 });
 
