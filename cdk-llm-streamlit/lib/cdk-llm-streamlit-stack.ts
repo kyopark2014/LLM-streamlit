@@ -13,32 +13,32 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const policy = new iam.PolicyDocument({
-      statements: [
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          actions: [
-            'ec2:*'
-          ],
-          resources: ['arn:aws:ec2:*:*:instance/*'],
-        }),
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          actions: [
-            'bedrock:*'
-          ],
-          resources: ['*'],
-        }),
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          actions: [
-            'ssm:GetParameter',
-            'ssm:GetParameters',
-          ],
-          resources: ['*'],
-        }),
-      ],
-    });
+    // const policy = new iam.PolicyDocument({
+    //   statements: [
+    //     new iam.PolicyStatement({
+    //       effect: iam.Effect.ALLOW,
+    //       actions: [
+    //         'ec2:*'
+    //       ],
+    //       resources: ['arn:aws:ec2:*:*:instance/*'],
+    //     }),
+    //     new iam.PolicyStatement({
+    //       effect: iam.Effect.ALLOW,
+    //       actions: [
+    //         'bedrock:*'
+    //       ],
+    //       resources: ['*'],
+    //     }),
+    //     new iam.PolicyStatement({
+    //       effect: iam.Effect.ALLOW,
+    //       actions: [
+    //         'ssm:GetParameter',
+    //         'ssm:GetParameters',
+    //       ],
+    //       resources: ['*'],
+    //     }),
+    //   ],
+    // });
 
     const ec2Role = new iam.Role(this, `role-ec2-for-${projectName}`, {
       roleName: `role-ec2-for-${projectName}-${region}`,
@@ -116,9 +116,12 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // userData.addCommands(userDataScript);
 
     // EC2 instance
-    const appInstance = new ec2.Instance(this, `app-instance-for-${projectName}`, {
-      instanceType: new ec2.InstanceType('t2.small'),
+    const appInstance = new ec2.Instance(this, `streamlit-for-${projectName}`, {
+      instanceType: new ec2.InstanceType('t2.small'), // m5.large
+      associatePublicIpAddress: true,
+      // machineImage: ec2Image,
       machineImage: ec2Image,
+      instanceName: `streamlit-for-${projectName}`,
       vpc: vpc,
       securityGroup: ec2SecurityGroup,
       role: ec2Role,
