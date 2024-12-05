@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as elb from 'aws-cdk-lib/aws-elasticloadbalancing';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -83,10 +84,10 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
           name: `public-subnet-for-${projectName}`,
           subnetType: ec2.SubnetType.PUBLIC
         }, 
-        // {
-        //   name: `private-subnet-for-${projectName}`,
-        //   subnetType: ec2.SubnetType.PRIVATE_ISOLATED
-        // },
+        {
+          name: `private-subnet-for-${projectName}`,
+          subnetType: ec2.SubnetType.PRIVATE_ISOLATED
+        },
       ],
     });
 
@@ -115,12 +116,18 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // const userDataScript = fs.readFileSync(path.join(__dirname, 'userdata.sh'), 'utf8');
     // userData.addCommands(userDataScript);
 
+    // ELB
+    const lb = new elb.LoadBalancer(this, 'LB', {
+      vpc,
+      internetFacing: true,
+    });
     // EC2 instance
     const appInstance = new ec2.Instance(this, `streamlit-for-${projectName}`, {
       instanceType: new ec2.InstanceType('t2.small'), // m5.large
-      associatePublicIpAddress: true,
+      // associatePublicIpAddress: true,
       // machineImage: ec2Image,
-      machineImage: ec2Image,
+      // machineImage: ec2Image,
+      machineImage: new ec2.AmazonLinuxImage({ generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2 }),
       instanceName: `streamlit-for-${projectName}`,
       vpc: vpc,
       securityGroup: ec2SecurityGroup,
@@ -136,6 +143,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       detailedMonitoring: true,
       instanceInitiatedShutdownBehavior: ec2.InstanceInitiatedShutdownBehavior.STOP,
     });
+
+    lb.addTarget(new elb.InstanceTarget(appInstance));
 
     // new cdk.CfnOutput(this, `appUrl-for-${projectName}`, {
     //   value: `http://${appInstance.instancePublicIp}/`,
