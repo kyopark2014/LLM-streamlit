@@ -99,6 +99,13 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     }); 
     vpc.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
+    const publicSubnet = new ec2.PublicSubnet(this, `public-subnet-for-${projectName}`, {
+      availabilityZone: vpc.availabilityZones[0],
+      cidrBlock: vpc.vpcCidrBlock,
+      vpcId: vpc.vpcId
+    });
+    
+
     const ec2SecurityGroup = new ec2.SecurityGroup(this, `ec2-sg-for-${projectName}`,
       {
         vpc: vpc,
@@ -132,6 +139,9 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // });
     // lb.addListener({ externalPort: 80 });
 
+    // vpc.availabilityZones
+
+
     // EC2 instance
     const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
       instanceType: new ec2.InstanceType('t2.small'), // m5.large
@@ -143,6 +153,9 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       }),
       instanceName: `app-for-${projectName}`,
       vpc: vpc,
+      vpcSubnets: {
+        subnets: [publicSubnet]
+      },
       securityGroup: ec2SecurityGroup,
       role: ec2Role,
       // userData: userData,
