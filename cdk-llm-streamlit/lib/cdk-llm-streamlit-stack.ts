@@ -84,8 +84,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       vpcName: `vpc-for-${projectName}`,
       maxAzs: 1,
       ipAddresses: ec2.IpAddresses.cidr("10.64.0.0/16"),
-      // natGateways: 1,
-      // createInternetGateway: true,
+      natGateways: 1,
+      createInternetGateway: true,
       subnetConfiguration: [
         {
           cidrMask: 24,
@@ -107,7 +107,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   vpcId: vpc.vpcId      
     // }); 
     
-/*
     const ec2SecurityGroup = new ec2.SecurityGroup(this, `ec2-sg-for-${projectName}`,
       {
         vpc: vpc,
@@ -121,7 +120,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       ec2.Peer.anyIpv4(),
       ec2.Port.tcp(80),
       'httpIpv4',
-    ); */
+    ); 
 
     // set AMI
     // const ec2Image = ec2.MachineImage.fromSsmParameter(
@@ -145,7 +144,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
 
 
     // EC2 instance
-  /*  const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
+    const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
       instanceType: new ec2.InstanceType('t2.small'), // m5.large
       // associatePublicIpAddress: true,
       // machineImage: ec2Image,
@@ -156,7 +155,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       instanceName: `app-for-${projectName}`,
       vpc: vpc,
       vpcSubnets: {
-        subnets: [publicSubnet]
+        subnets: vpc.publicSubnets
       },
       securityGroup: ec2SecurityGroup,
       role: ec2Role,
@@ -170,7 +169,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       }],
       detailedMonitoring: true,
       instanceInitiatedShutdownBehavior: ec2.InstanceInitiatedShutdownBehavior.STOP,
-    }); */
+    }); 
 
     // lb.addTarget(new elb.InstanceTarget(appInstance));
 
