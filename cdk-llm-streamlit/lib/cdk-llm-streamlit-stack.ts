@@ -48,12 +48,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
         new iam.ServicePrincipal("bedrock.amazonaws.com"),
       )
     });
-    ec2Role.addManagedPolicy({
-      managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AmazonSSMManagedInstanceCore',
-    });
-    ec2Role.addManagedPolicy({
-      managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AmazonSSMPatchAssociation',
-    });
 
     const ssmPolicy = new iam.PolicyStatement({  
       resources: ['*'],
