@@ -80,7 +80,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     );
 
     // vpc
-    const vpc = new ec2.Vpc(this, `vpc-for-${projectName}`, {
+ /*   const vpc = new ec2.Vpc(this, `vpc-for-${projectName}`, {
       vpcName: `vpc-for-${projectName}`,
       maxAzs: 1,
       cidr: "10.64.0.0/24",
@@ -103,9 +103,10 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       availabilityZone: vpc.availabilityZones[0],
       cidrBlock: vpc.vpcCidrBlock,
       vpcId: vpc.vpcId
-    });
+      
+    }); */
     
-
+/*
     const ec2SecurityGroup = new ec2.SecurityGroup(this, `ec2-sg-for-${projectName}`,
       {
         vpc: vpc,
@@ -119,7 +120,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       ec2.Peer.anyIpv4(),
       ec2.Port.tcp(80),
       'httpIpv4',
-    ); 
+    ); */
 
     // set AMI
     // const ec2Image = ec2.MachineImage.fromSsmParameter(
@@ -143,7 +144,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
 
 
     // EC2 instance
-    const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
+  /*  const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
       instanceType: new ec2.InstanceType('t2.small'), // m5.large
       // associatePublicIpAddress: true,
       // machineImage: ec2Image,
@@ -168,7 +169,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       }],
       detailedMonitoring: true,
       instanceInitiatedShutdownBehavior: ec2.InstanceInitiatedShutdownBehavior.STOP,
-    }); 
+    }); */
 
     // lb.addTarget(new elb.InstanceTarget(appInstance));
 
