@@ -7,6 +7,22 @@
 [Amazon Bedrock Knowledge base로 30분 만에 멀티모달 RAG 챗봇 구축하기 실전 가이드](https://aws.amazon.com/ko/blogs/tech/practical-guide-for-bedrock-kb-multimodal-chatbot/)
 
 
+## htts로 streamlit 연결하기
+
+[Serverless Streamlit app on AWS with HTTPS](https://kawsaur.medium.com/serverless-streamlit-app-on-aws-with-https-b5e5ff889590)를 참조합니다. 이 repo를 보면 CloudFront뒤에 ALB를 놓고 포트를 80으로 열고 있습니다.
+
+[frontend_stack.py](https://github.com/kawsark/streamlit-serverless/blob/main/streamlit_serverless_app/frontend_stack.py)에서는 아래와 같이 origin을 정의합니다. 
+
+```python
+origin=origins.LoadBalancerV2Origin(fargate_service.load_balancer, 
+ protocol_policy=cloudfront.OriginProtocolPolicy.HTTP_ONLY, 
+ http_port=80, 
+ origin_path="/", 
+ custom_headers = { custom_header_name : custom_header_value } ),
+```
+
+CloudFront - ALB - EC2로 하면 외부에서 cloudfront의 domain으로 접속시 https로 접속하게 됩니다.
+
 ## 설치 및 실행
 
 ### Cloud9 실행환경
