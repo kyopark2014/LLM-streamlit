@@ -7,6 +7,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as elbv2_tg from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets'
+import * as cloudFront from 'aws-cdk-lib/aws-cloudfront';
+import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
@@ -16,34 +18,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // const policy = new iam.PolicyDocument({
-    //   statements: [
-    //     new iam.PolicyStatement({
-    //       effect: iam.Effect.ALLOW,
-    //       actions: [
-    //         'ec2:*'
-    //       ],
-    //       resources: ['arn:aws:ec2:*:*:instance/*'],
-    //     }),
-    //     new iam.PolicyStatement({
-    //       effect: iam.Effect.ALLOW,
-    //       actions: [
-    //         'bedrock:*'
-    //       ],
-    //       resources: ['*'],
-    //     }),
-    //     new iam.PolicyStatement({
-    //       effect: iam.Effect.ALLOW,
-    //       actions: [
-    //         'ssm:GetParameter',
-    //         'ssm:GetParameters',
-    //       ],
-    //       resources: ['*'],
-    //     }),
-    //   ],
-    // });
-
-    const ec2Role = new iam.Role(this, `role-ec2-for-${projectName}`, {
+      const ec2Role = new iam.Role(this, `role-ec2-for-${projectName}`, {
       roleName: `role-ec2-for-${projectName}-${region}`,
       assumedBy: new iam.CompositePrincipal(
         new iam.ServicePrincipal("ec2.amazonaws.com"),
@@ -86,8 +61,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       vpcName: `vpc-for-${projectName}`,
       maxAzs: 2,
       ipAddresses: ec2.IpAddresses.cidr("20.64.0.0/16"),
-      // natGateways: 1,
-      // createInternetGateway: true,
+      natGateways: 1,
+      createInternetGateway: true,
       subnetConfiguration: [
         {
           cidrMask: 24,
@@ -102,12 +77,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       ],
     }); 
     vpc.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
-
-    // const publicSubnet = new ec2.PublicSubnet(this, `public-subnet-for-${projectName}`, {
-    //   availabilityZone: vpc.availabilityZones[0],
-    //   cidrBlock: vpc.vpcCidrBlock,
-    //   vpcId: vpc.vpcId      
-    // }); 
     
     const ec2SecurityGroup = new ec2.SecurityGroup(this, `ec2-sg-for-${projectName}`,
       {
@@ -128,11 +97,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       ec2.Port.tcp(22),
       'SSH',
     );
-    ec2SecurityGroup.addIngressRule(
-      ec2.Peer.anyIpv4(),
-      ec2.Port.tcp(8501),
-      'Streamlit',
-    ); 
+    // ec2SecurityGroup.addIngressRule(
+    //   ec2.Peer.anyIpv4(),
+    //   ec2.Port.tcp(8501),
+    //   'Streamlit',
+    // ); 
 
     const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
       vpc,
@@ -252,5 +221,40 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       description: 'lbUrl',
       exportName: 'lbUrl',
     });     
+
+    // cloudfront
+    const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
+      defaultBehavior: {
+        origin: new origins.LoadBalancerV2Origin(alb),
+        allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,
+        cachePolicy: cloudFront.CachePolicy.CACHING_DISABLED,
+        viewerProtocolPolicy: cloudFront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      },
+      priceClass: cloudFront.PriceClass.PRICE_CLASS_200,  
+    });
+    new cdk.CfnOutput(this, `distributionDomainName-for-${projectName}`, {
+      value: distribution.domainName,
+      description: 'The domain name of the Distribution',
+    });
+
+    // const cloudfront_distribution = cloudFront.Distribution(this, "StreamLitCloudFrontDistribution",
+    //   minimum_protocol_version=cloudFront.SecurityPolicyProtocol.SSL_V3,
+    //   comment="CloudFront distribution for Streamlit frontend application",
+    //   default_behavior=cloudfront.BehaviorOptions(
+    //       origin=origins.LoadBalancerV2Origin(fargate_service.load_balancer, 
+    //           protocol_policy=cloudfront.OriginProtocolPolicy.HTTP_ONLY, 
+    //           http_port=80, 
+    //           origin_path="/", 
+    //           custom_headers = { custom_header_name : custom_header_value } ),
+    //       viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+    //       allowed_methods=cloudfront.AllowedMethods.ALLOW_ALL,
+    //       cache_policy=cloudfront.CachePolicy.CACHING_DISABLED,
+    //       origin_request_policy=cloudfront.OriginRequestPolicy.ALL_VIEWER_AND_CLOUDFRONT_2022,
+    //       response_headers_policy=cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS,
+    //       compress=False
+    //   ),
+    // );
+
+
   }
 }
