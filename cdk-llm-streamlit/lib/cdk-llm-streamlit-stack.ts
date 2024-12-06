@@ -125,6 +125,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     );
     ec2SecurityGroup.addIngressRule(
       ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(22),
+      'httpIpv4',
+    );
+    ec2SecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
       ec2.Port.tcp(443),
       'httpIpv4',
     );
