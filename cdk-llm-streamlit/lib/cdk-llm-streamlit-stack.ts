@@ -8,10 +8,14 @@ import * as cloudFront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as fs from 'fs';
 import * as path from 'path';
-
+import { VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
+import * as apiGateway from 'aws-cdk-lib/aws-apigateway';
+import * as apigatewayv2 from 'aws-cdk-lib/aws-apigatewayv2';
+import { aws_apigatewayv2_integrations as apigatewayv2_integrations } from 'aws-cdk-lib';
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
 const accountId = process.env.CDK_DEFAULT_ACCOUNT;
+const stage = 'dev';
 
 export class CdkLlmStreamlitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -76,7 +80,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       ],
     }); 
     vpc.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
-    
+
+    // Ec2 Security Group
     const ec2SecurityGroup = new ec2.SecurityGroup(this, `ec2-sg-for-${projectName}`,
       {
         vpc: vpc,
@@ -91,22 +96,26 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       'SSH',
     );
 
-    const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
-      vpc,
-      allowAllOutbound: true,
-      description: 'security group for alb'
-    })
+
+    
+
+    // ALB    
+    // const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
+    //   vpc,
+    //   allowAllOutbound: true,
+    //   description: 'security group for alb'
+    // })
     // albSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone')
 
-    const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
-      internetFacing: true,
-      vpc,
-      vpcSubnets: {
-        subnets: vpc.publicSubnets
-      },
-      securityGroup: albSg
-    })
-    ec2SecurityGroup.connections.allowFrom(albSg, ec2.Port.tcp(8501), 'allow http traffic from alb')
+    // const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
+    //   internetFacing: true,
+    //   vpc,
+    //   vpcSubnets: {
+    //     subnets: vpc.publicSubnets
+    //   },
+    //   securityGroup: albSg
+    // })
+    // ec2SecurityGroup.connections.allowFrom(albSg, ec2.Port.tcp(8501), 'allow http traffic from alb')
 
     // const userData = ec2.UserData.forLinux({
     //   shebang: '#!/usr/bash',
@@ -119,6 +128,34 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   'python3 -m venv venv',
     //   'source venv/bin/activate'
     // )
+
+    // API Gateway
+    // const link = new apiGateway.VpcLink(this, 'link', {
+    //   targets: [alb],
+    // });
+
+    // const api = new apiGateway.RestApi(this, `api-chatbot-for-${projectName}`, {
+    //   description: 'API Gateway for chatbot',
+    //   endpointTypes: [apiGateway.EndpointType.REGIONAL],
+    //   restApiName: 'rest-api-for-'+projectName,      
+    //   binaryMediaTypes: ['application/pdf', 'text/plain', 'text/csv'], 
+    //   deployOptions: {
+    //     stageName: stage,
+
+    //     // logging for debug
+    //     // loggingLevel: apiGateway.MethodLoggingLevel.INFO, 
+    //     // dataTraceEnabled: true,
+    //   },
+    // });  
+
+    // const integration = new apiGateway.Integration({
+    //   type: apiGateway.IntegrationType.HTTP_PROXY,
+    //   integrationHttpMethod: 'ANY',
+    //   options: {
+    //     connectionType: apiGateway.ConnectionType.VPC_LINK,
+    //     vpcLink: link,
+    //   },
+    // });
 
     // set User Data
     const userData = ec2.UserData.forLinux();
@@ -156,43 +193,55 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     const targets: elbv2_tg.InstanceTarget[] = new Array();
     targets.push(new elbv2_tg.InstanceTarget(appInstance));
 
-    const listener = alb.addListener(`HttpListener-for-${projectName}`, {
-      port: 80,      
-      protocol: elbv2.ApplicationProtocol.HTTP
-    })
-    listener.addTargets(`WebEc2Target-for-${projectName}`, {
-      targets,
-      protocol: elbv2.ApplicationProtocol.HTTP,
-      port: 8501
-    })
-    
-    new cdk.CfnOutput(this, `lbUrl-for-${projectName}`, {
-      value: `http://${alb.loadBalancerDnsName}/`,
-      description: 'lbUrl',
-      exportName: 'lbUrl',
-    });     
+    const nlb = new elbv2.NetworkLoadBalancer(this, `lb-for-${projectName}`, { vpc });
 
-    // cloudfront
-    const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
-      comment: "CloudFront distribution for Streamlit frontend application",
-      defaultBehavior: {
-        origin: new origins.LoadBalancerV2Origin(alb, {
-          protocolPolicy: cloudFront.OriginProtocolPolicy.HTTP_ONLY,
-          httpPort: 80,
-          originPath: "/",
-          // customHeaders: { 'X-Origin-Verify' : 'a12345678' }
-        }),
-        allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,
-        cachePolicy: cloudFront.CachePolicy.CACHING_DISABLED,
-        viewerProtocolPolicy: cloudFront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-      },
-      priceClass: cloudFront.PriceClass.PRICE_CLASS_200,  
+    const listener = nlb.addListener(`listener-${projectName}`, { port: 80 });
+    listener.addTargets('target', {
+      targets,
+      port: 80,
     });
 
-    new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
-      value: 'https://'+distribution.domainName+'/',      
-      description: 'The web url of request for chat',
-    });     
+    const httpEndpoint = new apigatewayv2.HttpApi(this, 'HttpProxyPrivateApi', {
+      defaultIntegration: new apigatewayv2_integrations.HttpNlbIntegration('DefaultIntegration', listener),
+    });
+
+    // const listener = alb.addListener(`HttpListener-for-${projectName}`, {
+    //   port: 80,      
+    //   protocol: elbv2.ApplicationProtocol.HTTP
+    // })
+    // listener.addTargets(`WebEc2Target-for-${projectName}`, {
+    //   targets,
+    //   protocol: elbv2.ApplicationProtocol.HTTP,
+    //   port: 8501
+    // })
+    
+    // new cdk.CfnOutput(this, `lbUrl-for-${projectName}`, {
+    //   value: `http://${alb.loadBalancerDnsName}/`,
+    //   description: 'lbUrl',
+    //   exportName: 'lbUrl',
+    // });     
+
+    // cloudfront
+    // const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
+    //   comment: "CloudFront distribution for Streamlit frontend application",
+    //   defaultBehavior: {
+    //     origin: new origins.LoadBalancerV2Origin(alb, {
+    //       protocolPolicy: cloudFront.OriginProtocolPolicy.HTTP_ONLY,
+    //       httpPort: 80,
+    //       originPath: "/",
+    //       // customHeaders: { 'X-Origin-Verify' : 'a12345678' }
+    //     }),
+    //     allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,
+    //     cachePolicy: cloudFront.CachePolicy.CACHING_DISABLED,
+    //     viewerProtocolPolicy: cloudFront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+    //   },
+    //   priceClass: cloudFront.PriceClass.PRICE_CLASS_200,  
+    // });
+
+    // new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
+    //   value: 'https://'+distribution.domainName+'/',      
+    //   description: 'The web url of request for chat',
+    // });     
   }
 }
     // const cloudfront_distribution = cloudFront.Distribution(this, "StreamLitCloudFrontDistribution",
