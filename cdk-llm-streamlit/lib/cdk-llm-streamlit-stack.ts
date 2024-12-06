@@ -6,6 +6,8 @@ import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as elbv2_tg from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets'
 import * as cloudFront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
@@ -106,17 +108,22 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     })
     ec2SecurityGroup.connections.allowFrom(albSg, ec2.Port.tcp(8501), 'allow http traffic from alb')
 
-    const userData = ec2.UserData.forLinux({
-      shebang: '#!/usr/bin/bash',
-    })
-    userData.addCommands(
-      'sudo yum install git python-pip -y',
-      'pip install pip --upgrade',
-      'pip install streamlit boto3',
-      'git clone https://github.com/kyopark2014/llm-streamlit',
-      'python3 -m venv venv',
-      'source venv/bin/activate'
-    )
+    // const userData = ec2.UserData.forLinux({
+    //   shebang: '#!/usr/bash',
+    // })
+    // userData.addCommands(
+    //   'sudo yum install git python-pip -y',
+    //   'pip install pip --upgrade',
+    //   'pip install streamlit boto3',
+    //   'git clone https://github.com/kyopark2014/llm-streamlit',
+    //   'python3 -m venv venv',
+    //   'source venv/bin/activate'
+    // )
+
+    // set User Data
+    const userData = ec2.UserData.forLinux();
+    const userDataScript = fs.readFileSync(path.join(__dirname, 'userdata.sh'), 'utf8');
+    userData.addCommands(userDataScript);
 
     // EC2 instance
     const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
@@ -173,7 +180,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
           protocolPolicy: cloudFront.OriginProtocolPolicy.HTTP_ONLY,
           httpPort: 80,
           originPath: "/",
-          customHeaders: { 'X-Origin-Verify' : 'a12345678' }
+          // customHeaders: { 'X-Origin-Verify' : 'a12345678' }
         }),
         allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,
         cachePolicy: cloudFront.CachePolicy.CACHING_DISABLED,
