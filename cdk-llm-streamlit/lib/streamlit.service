@@ -1,0 +1,12 @@
+[Unit]
+Description=Streamlit
+After=network-online.target
+
+[Service]
+User=ec2-user
+Group=ec2-user
+Restart=always
+ExecStart=/home/ec2-user/.local/bin/streamlit run /home/ec2-user/llm-streamlit/application/app.py
+
+[Install]
+WantedBy=multi-user.target
