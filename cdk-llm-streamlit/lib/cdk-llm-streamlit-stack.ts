@@ -133,12 +133,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // userData.addCommands(userDataScript);
 
     // ELB
-    // const lb = new elb.LoadBalancer(this, `lb-for-${projectName}`, {
-    //   vpc,
-    //   internetFacing: true,
-    // removalPolicy: cdk.RemovalPolicy.DESTROY,
-    // });
-    // lb.addListener({ externalPort: 80 });
+    const lb = new elb.LoadBalancer(this, `lb-for-${projectName}`, {
+      vpc,
+      internetFacing: true,
+    });
+    lb.addListener({externalPort: 80});
 
     // vpc.availabilityZones
 
@@ -173,10 +172,10 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
 
     // lb.addTarget(new elb.InstanceTarget(appInstance));
 
-    // new cdk.CfnOutput(this, `appUrl-for-${projectName}`, {
-    //   value: `http://${appInstance.instancePublicIp}/`,
-    //   description: 'appUrl',
-    //   exportName: 'appUrl',
-    // }); 
+    new cdk.CfnOutput(this, `appUrl-for-${projectName}`, {
+      value: `http://${appInstance.instancePublicIp}/`,
+      description: 'appUrl',
+      exportName: 'appUrl',
+    }); 
   }
 }
