@@ -243,6 +243,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     })
     listener.addTargets('WebEc2Target', {
       targets,
+      protocol: elbv2.ApplicationProtocol.HTTP,
       port: 8501
     })
     
