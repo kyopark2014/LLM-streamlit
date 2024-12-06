@@ -5,6 +5,8 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as elb from 'aws-cdk-lib/aws-elasticloadbalancing';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import * as elbv2_tg from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets'
 
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
@@ -143,12 +145,32 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // userData.addCommands(userDataScript);
 
     // ELB
-    const lb = new elb.LoadBalancer(this, `lb-for-${projectName}`, {
+    // const lb = new elb.LoadBalancer(this, `lb-for-${projectName}`, {
+    //   vpc,
+    //   internetFacing: true,      
+    // });
+    // lb.addListener({externalPort: 80});
+    // lb.addListener({externalPort: 8501});
+
+    const albSg = new ec2.SecurityGroup(this, 'AlbSg', {
       vpc,
-      internetFacing: true,      
-    });
-    lb.addListener({externalPort: 80});
-    lb.addListener({externalPort: 8501});
+      allowAllOutbound: true,
+      description: 'security group for alb'
+    })
+    albSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone')
+
+
+    const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
+      internetFacing: true,
+      vpc,
+      vpcSubnets: {
+        subnets: vpc.publicSubnets
+      },
+      securityGroup: albSg
+    })
+
+   
+
 
     // vpc.availabilityZones
 
@@ -181,12 +203,33 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       instanceInitiatedShutdownBehavior: ec2.InstanceInitiatedShutdownBehavior.STOP,
     }); 
 
-    lb.addTarget(new elb.InstanceTarget(appInstance));
-
     new cdk.CfnOutput(this, `appUrl-for-${projectName}`, {
       value: `http://${appInstance.instancePublicIp}/`,
       description: 'appUrl',
       exportName: 'appUrl',
     }); 
+    
+    // lb.addTarget(new elb.InstanceTarget(appInstance));
+    // alb.addTarget(new elb.InstanceTarget(appInstance));
+
+    const targets: elbv2_tg.InstanceTarget[] = new Array();
+    targets.push(new elbv2_tg.InstanceTarget(appInstance));
+
+    const listener = alb.addListener('HttpListener', {
+      port: 80,
+      protocol: elbv2.ApplicationProtocol.HTTP
+    })
+    listener.addTargets('WebEc2Target', {
+      targets,
+      port: 80
+    })
+    
+    new cdk.CfnOutput(this, `lbUrl-for-${projectName}`, {
+      value: `http://${alb.loadBalancerDnsName}/`,
+      description: 'appUrl',
+      exportName: 'appUrl',
+    }); 
+
+    
   }
 }
