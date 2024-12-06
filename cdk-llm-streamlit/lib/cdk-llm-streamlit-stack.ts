@@ -148,6 +148,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       internetFacing: true,      
     });
     lb.addListener({externalPort: 80});
+    lb.addListener({externalPort: 8501});
 
     // vpc.availabilityZones
 
