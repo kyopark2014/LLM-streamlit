@@ -207,7 +207,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     targets.push(new elbv2_tg.InstanceTarget(appInstance));
 
     const listener = alb.addListener(`HttpListener-for-${projectName}`, {
-      port: 80,
+      port: 80,      
       protocol: elbv2.ApplicationProtocol.HTTP
     })
     listener.addTargets(`WebEc2Target-for-${projectName}`, {
@@ -228,6 +228,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       defaultBehavior: {
         origin: new origins.LoadBalancerV2Origin(alb, {
           protocolPolicy: cloudFront.OriginProtocolPolicy.HTTP_ONLY,
+          httpPort: 80,
+          originPath: "/"
         }),
         allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,
         cachePolicy: cloudFront.CachePolicy.CACHING_DISABLED,
