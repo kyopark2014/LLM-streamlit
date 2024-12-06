@@ -172,7 +172,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
         origin: new origins.LoadBalancerV2Origin(alb, {
           protocolPolicy: cloudFront.OriginProtocolPolicy.HTTP_ONLY,
           httpPort: 80,
-          originPath: "/"
+          originPath: "/",
+          customHeaders: { 'X-Origin-Verify' : 'a12345678' }
         }),
         allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,
         cachePolicy: cloudFront.CachePolicy.CACHING_DISABLED,
@@ -187,3 +188,20 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     });     
   }
 }
+    // const cloudfront_distribution = cloudFront.Distribution(this, "StreamLitCloudFrontDistribution",
+    //   minimum_protocol_version=cloudFront.SecurityPolicyProtocol.SSL_V3,
+    //   comment="CloudFront distribution for Streamlit frontend application",
+    //   default_behavior=cloudfront.BehaviorOptions(
+    //       origin=origins.LoadBalancerV2Origin(fargate_service.load_balancer, 
+    //           protocol_policy=cloudfront.OriginProtocolPolicy.HTTP_ONLY, 
+    //           http_port=80, 
+    //           origin_path="/", 
+    //           custom_headers = { custom_header_name : custom_header_value } ),
+    //       viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+    //       allowed_methods=cloudfront.AllowedMethods.ALLOW_ALL,
+    //       cache_policy=cloudfront.CachePolicy.CACHING_DISABLED,
+    //       origin_request_policy=cloudfront.OriginRequestPolicy.ALL_VIEWER_AND_CLOUDFRONT_2022,
+    //       response_headers_policy=cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS,
+    //       compress=False
+    //   ),
+    // );
