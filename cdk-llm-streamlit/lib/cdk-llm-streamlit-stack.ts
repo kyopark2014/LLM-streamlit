@@ -135,7 +135,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // ELB
     const lb = new elb.LoadBalancer(this, `lb-for-${projectName}`, {
       vpc,
-      internetFacing: true,
+      internetFacing: true,      
     });
     lb.addListener({externalPort: 80});
 
@@ -170,7 +170,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       instanceInitiatedShutdownBehavior: ec2.InstanceInitiatedShutdownBehavior.STOP,
     }); 
 
-    // lb.addTarget(new elb.InstanceTarget(appInstance));
+    lb.addTarget(new elb.InstanceTarget(appInstance));
 
     new cdk.CfnOutput(this, `appUrl-for-${projectName}`, {
       value: `http://${appInstance.instancePublicIp}/`,
