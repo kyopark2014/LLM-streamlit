@@ -192,6 +192,8 @@ sudo python3 -m pip install --upgrade pip
 
 [CDK-VPC](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ec2.Vpc.html)
 
+[CDK-VpcEndpoint](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ec2.VpcEndpoint.html)
+
 [EC2에 간단한 Streamlit 웹 서비스 올리기](https://everenew.tistory.com/317)
 
 [Deploying Streamlit Application on AWS EC2 Instance with NGINX Server](https://medium.com/@borghareshubham510/deploying-streamlit-application-on-aws-ec2-instances-with-nginx-server-d20c83bf150a)
