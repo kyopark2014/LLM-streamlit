@@ -84,7 +84,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // vpc
     const vpc = new ec2.Vpc(this, `vpc-for-${projectName}`, {
       vpcName: `vpc-for-${projectName}`,
-      maxAzs: 1,
+      maxAzs: 2,
       ipAddresses: ec2.IpAddresses.cidr("20.64.0.0/16"),
       natGateways: 1,
       createInternetGateway: true,
