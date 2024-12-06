@@ -225,10 +225,10 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       instanceInitiatedShutdownBehavior: ec2.InstanceInitiatedShutdownBehavior.TERMINATE,
     }); 
 
-    new cdk.CfnOutput(this, `appUrl-for-${projectName}`, {
+    new cdk.CfnOutput(this, `instanceUrl-for-${projectName}`, {
       value: `http://${appInstance.instancePublicIp}/`,
-      description: 'appUrl',
-      exportName: 'appUrl',
+      description: 'ec2InstanceUrl',
+      exportName: 'ec2InstanceUrl',
     }); 
 
     // lb.addTarget(new elb.InstanceTarget(appInstance));
@@ -248,8 +248,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     
     new cdk.CfnOutput(this, `lbUrl-for-${projectName}`, {
       value: `http://${alb.loadBalancerDnsName}/`,
-      description: 'appUrl',
-      exportName: 'appUrl',
+      description: 'lbUrl',
+      exportName: 'lbUrl',
     }); 
 
     
