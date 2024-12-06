@@ -86,8 +86,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       vpcName: `vpc-for-${projectName}`,
       maxAzs: 2,
       ipAddresses: ec2.IpAddresses.cidr("20.64.0.0/16"),
-      natGateways: 1,
-      createInternetGateway: true,
+      // natGateways: 1,
+      // createInternetGateway: true,
       subnetConfiguration: [
         {
           cidrMask: 24,
@@ -118,11 +118,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       }
     );
 
-    ec2SecurityGroup.addIngressRule(
-      ec2.Peer.anyIpv4(),
-      ec2.Port.tcp(80),
-      'httpIpv4',
-    );
+    // ec2SecurityGroup.addIngressRule(
+    //   ec2.Peer.anyIpv4(),
+    //   ec2.Port.tcp(80),
+    //   'httpIpv4',
+    // );
     ec2SecurityGroup.addIngressRule(
       ec2.Peer.anyIpv4(),
       ec2.Port.tcp(22),
@@ -150,7 +150,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       },
       securityGroup: albSg
     })
-    ec2SecurityGroup.connections.allowFrom(albSg, ec2.Port.tcp(80), 'allow http traffic from alb')
+    // ec2SecurityGroup.connections.allowFrom(albSg, ec2.Port.tcp(80), 'allow http traffic from alb')
     ec2SecurityGroup.connections.allowFrom(albSg, ec2.Port.tcp(8501), 'allow http traffic from alb')
 
 
@@ -225,11 +225,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       instanceInitiatedShutdownBehavior: ec2.InstanceInitiatedShutdownBehavior.TERMINATE,
     }); 
 
-    new cdk.CfnOutput(this, `instanceUrl-for-${projectName}`, {
-      value: `http://${appInstance.instancePublicIp}/`,
-      description: 'ec2InstanceUrl',
-      exportName: 'ec2InstanceUrl',
-    }); 
+    // new cdk.CfnOutput(this, `instanceUrl-for-${projectName}`, {
+    //   value: `http://${appInstance.instancePublicIp}/`,
+    //   description: 'ec2InstanceUrl',
+    //   exportName: 'ec2InstanceUrl',
+    // }); 
 
     // lb.addTarget(new elb.InstanceTarget(appInstance));
     // alb.addTarget(new elb.InstanceTarget(appInstance));
@@ -237,11 +237,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     const targets: elbv2_tg.InstanceTarget[] = new Array();
     targets.push(new elbv2_tg.InstanceTarget(appInstance));
 
-    const listener = alb.addListener('HttpListener', {
+    const listener = alb.addListener(`HttpListener-for-${projectName}`, {
       port: 80,
       protocol: elbv2.ApplicationProtocol.HTTP
     })
-    listener.addTargets('WebEc2Target', {
+    listener.addTargets(`WebEc2Target-for-${projectName}`, {
       targets,
       protocol: elbv2.ApplicationProtocol.HTTP,
       port: 8501
@@ -251,8 +251,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       value: `http://${alb.loadBalancerDnsName}/`,
       description: 'lbUrl',
       exportName: 'lbUrl',
-    }); 
-
-    
+    });     
   }
 }
