@@ -243,7 +243,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     })
     listener.addTargets('WebEc2Target', {
       targets,
-      port: 80
+      port: 8501
     })
     
     new cdk.CfnOutput(this, `lbUrl-for-${projectName}`, {
