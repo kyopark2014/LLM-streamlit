@@ -224,18 +224,26 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
 
     // cloudfront
     const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
+      comment: "CloudFront distribution for Streamlit frontend application",
       defaultBehavior: {
-        origin: new origins.LoadBalancerV2Origin(alb),
+        origin: new origins.LoadBalancerV2Origin(alb, {
+          protocolPolicy: cloudFront.OriginProtocolPolicy.HTTP_ONLY,
+        }),
         allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,
         cachePolicy: cloudFront.CachePolicy.CACHING_DISABLED,
         viewerProtocolPolicy: cloudFront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
       priceClass: cloudFront.PriceClass.PRICE_CLASS_200,  
     });
-    new cdk.CfnOutput(this, `distributionDomainName-for-${projectName}`, {
-      value: distribution.domainName,
-      description: 'The domain name of the Distribution',
-    });
+    // new cdk.CfnOutput(this, `distributionDomainName-for-${projectName}`, {
+    //   value: distribution.domainName,
+    //   description: 'The domain name of the Distribution',
+    // });
+
+    new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
+      value: 'https://'+distribution.domainName+'/',      
+      description: 'The web url of request for chat',
+    });     
 
     // const cloudfront_distribution = cloudFront.Distribution(this, "StreamLitCloudFrontDistribution",
     //   minimum_protocol_version=cloudFront.SecurityPolicyProtocol.SSL_V3,
