@@ -193,7 +193,21 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     const targets: elbv2_tg.InstanceTarget[] = new Array();
     targets.push(new elbv2_tg.InstanceTarget(appInstance));
 
-    const nlb = new elbv2.NetworkLoadBalancer(this, `lb-for-${projectName}`, { vpc });
+
+    const nlbSg = new ec2.SecurityGroup(this, `nlb-sg-for-${projectName}`, {
+      vpc,
+      allowAllOutbound: true,
+      description: 'security group for nlb'
+    })
+    nlbSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone')
+
+    const nlb = new elbv2.NetworkLoadBalancer(this, `lb-for-${projectName}`, { 
+      vpc,
+      vpcSubnets: {
+        subnets: vpc.publicSubnets
+      },
+      securityGroups: [nlbSg]
+    });
 
     const listener = nlb.addListener(`listener-${projectName}`, { port: 80 });
     listener.addTargets('target', {
