@@ -126,20 +126,15 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     ec2SecurityGroup.addIngressRule(
       ec2.Peer.anyIpv4(),
       ec2.Port.tcp(22),
-      'httpIpv4',
-    );
-    ec2SecurityGroup.addIngressRule(
-      ec2.Peer.anyIpv4(),
-      ec2.Port.tcp(443),
-      'httpIpv4',
+      'SSH',
     );
     ec2SecurityGroup.addIngressRule(
       ec2.Peer.anyIpv4(),
       ec2.Port.tcp(8501),
-      'httpIpv4',
+      'Streamlit',
     ); 
 
-    const albSg = new ec2.SecurityGroup(this, 'AlbSg', {
+    const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
       vpc,
       allowAllOutbound: true,
       description: 'security group for alb'
@@ -180,7 +175,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     
 
     const userData = ec2.UserData.forLinux({
-      shebang: '#!/bin/bash',
+      shebang: '#!/usr/bin/bash',
     })
     userData.addCommands(
       'sudo yum install git python-pip -y',
