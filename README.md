@@ -203,3 +203,5 @@ sudo python3 -m pip install --upgrade pip
 [Running Streamlit on Amazon EC2 with HTTPS](https://medium.com/@stevenjlm/running-streamlit-on-amazon-ec2-with-https-f20e38fffbe7)
 
 [Setting up a VPC Endpoint for yum with AWS CDK](https://dev.to/jhashimoto/setting-up-a-vpc-endpoint-for-yum-with-aws-cdk-3a8o)
+
+[CloudFront - ALB 구성 시 보안 강화 방안](https://everenew.tistory.com/317)
