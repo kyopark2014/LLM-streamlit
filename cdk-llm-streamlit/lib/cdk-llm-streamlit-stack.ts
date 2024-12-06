@@ -134,6 +134,26 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       'httpIpv4',
     ); 
 
+    const albSg = new ec2.SecurityGroup(this, 'AlbSg', {
+      vpc,
+      allowAllOutbound: true,
+      description: 'security group for alb'
+    })
+    albSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone')
+
+
+    const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
+      internetFacing: true,
+      vpc,
+      vpcSubnets: {
+        subnets: vpc.publicSubnets
+      },
+      securityGroup: albSg
+    })
+    ec2SecurityGroup.connections.allowFrom(albSg, ec2.Port.tcp(80), 'allow http traffic from alb')
+    ec2SecurityGroup.connections.allowFrom(albSg, ec2.Port.tcp(8501), 'allow http traffic from alb')
+
+
     // set AMI
     // const ec2Image = ec2.MachineImage.fromSsmParameter(
     //   '/aws/service/canonical/ubuntu/server/focal/stable/current/amd64/hvm/ebs-gp2/ami-id'
@@ -152,55 +172,57 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // lb.addListener({externalPort: 80});
     // lb.addListener({externalPort: 8501});
 
-    const albSg = new ec2.SecurityGroup(this, 'AlbSg', {
-      vpc,
-      allowAllOutbound: true,
-      description: 'security group for alb'
+    
+
+    const userData = ec2.UserData.forLinux({
+      shebang: '#!/bin/bash',
     })
-    albSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone')
-
-
-    const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
-      internetFacing: true,
-      vpc,
-      vpcSubnets: {
-        subnets: vpc.publicSubnets
-      },
-      securityGroup: albSg
-    })
-
-   
-
+    userData.addCommands(
+      'sudo yum install git python-pip -y',
+      'pip install pip --upgrade',
+      'pip install streamlit boto3',
+      'git clone https://github.com/kyopark2014/llm-streamlit',
+      'python3 -m venv venv',
+      'source venv/bin/activate'
+    )
 
     // vpc.availabilityZones
 
 
     // EC2 instance
     const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
+      instanceName: `app-for-${projectName}`,
       instanceType: new ec2.InstanceType('t2.small'), // m5.large
+      // instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.SMALL),
+      
       // associatePublicIpAddress: true,
       // machineImage: ec2Image,
       // machineImage: ec2Image,
+      
+            
       machineImage: new ec2.AmazonLinuxImage({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2023
       }),
-      instanceName: `app-for-${projectName}`,
+      // machineImage: ec2.MachineImage.latestAmazonLinux2023(),
       vpc: vpc,
+      // vpcSubnets: vpc.selectSubnets({
+      //   subnetType: ec2.SubnetType.PUBLIC,
+      // }),
       vpcSubnets: {
         subnets: vpc.publicSubnets
       },
       securityGroup: ec2SecurityGroup,
       role: ec2Role,
-      // userData: userData,
+      userData: userData,
       blockDevices: [{
         deviceName: '/dev/xvda',
         volume: ec2.BlockDeviceVolume.ebs(8, {
-          deleteOnTermination: false,
+          deleteOnTermination: true,
           encrypted: true,
         }),
       }],
       detailedMonitoring: true,
-      instanceInitiatedShutdownBehavior: ec2.InstanceInitiatedShutdownBehavior.STOP,
+      instanceInitiatedShutdownBehavior: ec2.InstanceInitiatedShutdownBehavior.TERMINATE,
     }); 
 
     new cdk.CfnOutput(this, `appUrl-for-${projectName}`, {
@@ -208,7 +230,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       description: 'appUrl',
       exportName: 'appUrl',
     }); 
-    
+
     // lb.addTarget(new elb.InstanceTarget(appInstance));
     // alb.addTarget(new elb.InstanceTarget(appInstance));
 
