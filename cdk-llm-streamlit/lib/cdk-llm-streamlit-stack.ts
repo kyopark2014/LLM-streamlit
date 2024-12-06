@@ -2,9 +2,6 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import * as elb from 'aws-cdk-lib/aws-elasticloadbalancing';
-import * as fs from 'fs';
-import * as path from 'path';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as elbv2_tg from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets'
 import * as cloudFront from 'aws-cdk-lib/aws-cloudfront';
@@ -86,22 +83,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
         securityGroupName: `ec2-sg-for-${projectName}`,
       }
     );
-
-    // ec2SecurityGroup.addIngressRule(
-    //   ec2.Peer.anyIpv4(),
-    //   ec2.Port.tcp(80),
-    //   'httpIpv4',
-    // );
     ec2SecurityGroup.addIngressRule(
       ec2.Peer.anyIpv4(),
       ec2.Port.tcp(22),
       'SSH',
     );
-    // ec2SecurityGroup.addIngressRule(
-    //   ec2.Peer.anyIpv4(),
-    //   ec2.Port.tcp(8501),
-    //   'Streamlit',
-    // ); 
 
     const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
       vpc,
@@ -109,7 +95,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       description: 'security group for alb'
     })
     albSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone')
-
 
     const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
       internetFacing: true,
@@ -119,29 +104,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       },
       securityGroup: albSg
     })
-    // ec2SecurityGroup.connections.allowFrom(albSg, ec2.Port.tcp(80), 'allow http traffic from alb')
     ec2SecurityGroup.connections.allowFrom(albSg, ec2.Port.tcp(8501), 'allow http traffic from alb')
-
-
-    // set AMI
-    // const ec2Image = ec2.MachineImage.fromSsmParameter(
-    //   '/aws/service/canonical/ubuntu/server/focal/stable/current/amd64/hvm/ebs-gp2/ami-id'
-    // );
-    
-    // set User Data
-    // const userData = ec2.UserData.forLinux();
-    // const userDataScript = fs.readFileSync(path.join(__dirname, 'userdata.sh'), 'utf8');
-    // userData.addCommands(userDataScript);
-
-    // ELB
-    // const lb = new elb.LoadBalancer(this, `lb-for-${projectName}`, {
-    //   vpc,
-    //   internetFacing: true,      
-    // });
-    // lb.addListener({externalPort: 80});
-    // lb.addListener({externalPort: 8501});
-
-    
 
     const userData = ec2.UserData.forLinux({
       shebang: '#!/usr/bin/bash',
@@ -155,31 +118,20 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       'source venv/bin/activate'
     )
 
-    // vpc.availabilityZones
-
-
     // EC2 instance
     const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
       instanceName: `app-for-${projectName}`,
       instanceType: new ec2.InstanceType('t2.small'), // m5.large
-      // instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.SMALL),
-      
-      // associatePublicIpAddress: true,
-      // machineImage: ec2Image,
-      // machineImage: ec2Image,
-      
-            
+      // instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.SMALL),      
       machineImage: new ec2.AmazonLinuxImage({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2023
       }),
       // machineImage: ec2.MachineImage.latestAmazonLinux2023(),
       vpc: vpc,
-      // vpcSubnets: vpc.selectSubnets({
-      //   subnetType: ec2.SubnetType.PUBLIC,
-      // }),
       vpcSubnets: {
         subnets: vpc.publicSubnets
       },
+      // vpcSubnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),      
       securityGroup: ec2SecurityGroup,
       role: ec2Role,
       userData: userData,
@@ -193,15 +145,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       detailedMonitoring: true,
       instanceInitiatedShutdownBehavior: ec2.InstanceInitiatedShutdownBehavior.TERMINATE,
     }); 
-
-    // new cdk.CfnOutput(this, `instanceUrl-for-${projectName}`, {
-    //   value: `http://${appInstance.instancePublicIp}/`,
-    //   description: 'ec2InstanceUrl',
-    //   exportName: 'ec2InstanceUrl',
-    // }); 
-
-    // lb.addTarget(new elb.InstanceTarget(appInstance));
-    // alb.addTarget(new elb.InstanceTarget(appInstance));
 
     const targets: elbv2_tg.InstanceTarget[] = new Array();
     targets.push(new elbv2_tg.InstanceTarget(appInstance));
@@ -237,34 +180,10 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       },
       priceClass: cloudFront.PriceClass.PRICE_CLASS_200,  
     });
-    // new cdk.CfnOutput(this, `distributionDomainName-for-${projectName}`, {
-    //   value: distribution.domainName,
-    //   description: 'The domain name of the Distribution',
-    // });
 
     new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
       value: 'https://'+distribution.domainName+'/',      
       description: 'The web url of request for chat',
     });     
-
-    // const cloudfront_distribution = cloudFront.Distribution(this, "StreamLitCloudFrontDistribution",
-    //   minimum_protocol_version=cloudFront.SecurityPolicyProtocol.SSL_V3,
-    //   comment="CloudFront distribution for Streamlit frontend application",
-    //   default_behavior=cloudfront.BehaviorOptions(
-    //       origin=origins.LoadBalancerV2Origin(fargate_service.load_balancer, 
-    //           protocol_policy=cloudfront.OriginProtocolPolicy.HTTP_ONLY, 
-    //           http_port=80, 
-    //           origin_path="/", 
-    //           custom_headers = { custom_header_name : custom_header_value } ),
-    //       viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-    //       allowed_methods=cloudfront.AllowedMethods.ALLOW_ALL,
-    //       cache_policy=cloudfront.CachePolicy.CACHING_DISABLED,
-    //       origin_request_policy=cloudfront.OriginRequestPolicy.ALL_VIEWER_AND_CLOUDFRONT_2022,
-    //       response_headers_policy=cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS,
-    //       compress=False
-    //   ),
-    // );
-
-
   }
 }
