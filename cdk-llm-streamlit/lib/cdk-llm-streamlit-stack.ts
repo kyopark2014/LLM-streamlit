@@ -99,11 +99,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       ec2.Port.tcp(22),
       'SSH',
     );
-    ec2SecurityGroup.addIngressRule(
-      ec2.Peer.anyIpv4(),
-      ec2.Port.tcp(80),
-      'HTTP',
-    );
+    // ec2SecurityGroup.addIngressRule(
+    //   ec2.Peer.anyIpv4(),
+    //   ec2.Port.tcp(80),
+    //   'HTTP',
+    // );
 
     // ALB    
     const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
@@ -113,7 +113,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       description: 'security group for alb'
     })
     albSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone')
-
+    
     const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
       internetFacing: true,
       vpc,
