@@ -95,11 +95,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       ec2.Port.tcp(22),
       'SSH',
     );
-    ec2SecurityGroup.addIngressRule(
-      ec2.Peer.anyIpv4(),
-      ec2.Port.tcp(80),
-      'HTTP',
-    );
 
 
     
@@ -213,9 +208,9 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
 
     const nlb = new elbv2.NetworkLoadBalancer(this, `lb-for-${projectName}`, { 
       vpc,
-      vpcSubnets: {
-        subnets: vpc.publicSubnets
-      },
+      // vpcSubnets: {
+      //   subnets: vpc.publicSubnets
+      // },
       loadBalancerName: `nlb-${projectName}`,
       // securityGroups: [nlbSg]
     });
