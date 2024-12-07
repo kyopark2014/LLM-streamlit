@@ -154,8 +154,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   },
     // });  
 
-    // const integration = new apiGateway.Integration({
-    //   type: apiGateway.IntegrationType.HTTP_PROXY,
+    //  const integration = new apiGateway.Integration({
+    //    type: apiGateway.IntegrationType.HTTP_PROXY,
     //   integrationHttpMethod: 'ANY',
     //   options: {
     //     connectionType: apiGateway.ConnectionType.VPC_LINK,
@@ -198,7 +198,22 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
 
     const targets: elbv2_tg.InstanceTarget[] = new Array();
     targets.push(new elbv2_tg.InstanceTarget(appInstance));
+
+    const listener = alb.addListener(`HttpListener-for-${projectName}`, {
+      port: 80,      
+      protocol: elbv2.ApplicationProtocol.HTTP
+    })
+    listener.addTargets(`WebEc2Target-for-${projectName}`, {
+      targets,
+      protocol: elbv2.ApplicationProtocol.HTTP,
+      port: 80
+    })
     
+    new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
+      value: `http://${alb.loadBalancerDnsName}/`,
+      description: 'albUrl',
+      exportName: 'albUrl',
+    });     
 
     // const nlb = new elbv2.NetworkLoadBalancer(this, `nlb-for-${projectName}`, {
     //   vpc,
@@ -214,22 +229,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // const httpEndpoint = new apigatewayv2.HttpApi(this, 'HttpProxyPrivateApi', {
     //   defaultIntegration: new apigatewayv2_integrations.HttpNlbIntegration('DefaultIntegration', listener),
     // });
-
-    const listener = alb.addListener(`HttpListener-for-${projectName}`, {
-      port: 80,      
-      protocol: elbv2.ApplicationProtocol.HTTP
-    })
-    listener.addTargets(`WebEc2Target-for-${projectName}`, {
-      targets,
-      protocol: elbv2.ApplicationProtocol.HTTP,
-      port: 8501
-    })
-    
-    new cdk.CfnOutput(this, `lbUrl-for-${projectName}`, {
-      value: `http://${alb.loadBalancerDnsName}/`,
-      description: 'lbUrl',
-      exportName: 'lbUrl',
-    });     
 
     // cloudfront
     // const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
