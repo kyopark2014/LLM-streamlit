@@ -86,7 +86,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     vpc.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
     // Ec2 Security Group
-    const ec2SecurityGroup = new ec2.SecurityGroup(this, `ec2-sg-for-${projectName}`,
+    const ec2Sg = new ec2.SecurityGroup(this, `ec2-sg-for-${projectName}`,
       {
         vpc: vpc,
         allowAllOutbound: true,
@@ -94,12 +94,12 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
         securityGroupName: `ec2-sg-for-${projectName}`,
       }
     );
-    ec2SecurityGroup.addIngressRule(
+    ec2Sg.addIngressRule(
       ec2.Peer.anyIpv4(),
       ec2.Port.tcp(22),
       'SSH',
     );
-    // ec2SecurityGroup.addIngressRule(
+    // ec2Sg.addIngressRule(
     //   ec2.Peer.anyIpv4(),
     //   ec2.Port.tcp(80),
     //   'HTTP',
@@ -112,7 +112,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       securityGroupName: `alb-sg-for-${projectName}`,
       description: 'security group for alb'
     })
-    albSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone')
+    ec2Sg.connections.allowFrom(albSg, ec2.Port.tcp(80), 'allow http traffic from alb') // alb -> ec2
+    albSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone') // internet -> alb
     
     const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
       internetFacing: true,
@@ -123,7 +124,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       securityGroup: albSg,
       loadBalancerName: `alb-for-${projectName}`
     })
-    ec2SecurityGroup.connections.allowFrom(albSg, ec2.Port.tcp(80), 'allow http traffic from alb')
+   
 
     // const userData = ec2.UserData.forLinux({
     //   shebang: '#!/usr/bash',
@@ -171,7 +172,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
         subnets: vpc.publicSubnets
       },
       // vpcSubnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),      
-      securityGroup: ec2SecurityGroup,
+      securityGroup: ec2Sg,
       role: ec2Role,
       // userData: userData,
       blockDevices: [{
@@ -200,10 +201,21 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       port: 80
     })
 
+
+    // VPC Link Security Group    
+    const vpcLinkSg = new ec2.SecurityGroup(this, `vpclink-sg-for-${projectName}`, {
+      vpc,
+      allowAllOutbound: true,
+      securityGroupName: `vpclink-sg-for-${projectName}`,
+      description: 'security group for vpclink'
+    })
+    albSg.connections.allowFrom(vpcLinkSg, ec2.Port.tcp(80), 'allow http traffic from vpclink') // alb -> ec2
+    // vpcLinkSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone') // internet -> alb
+
     const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
       vpc,
       subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
-      securityGroups: [albSg],
+      securityGroups: [vpcLinkSg],
       vpcLinkName: `VpcLink-for-${projectName}`,
     });
 
