@@ -95,11 +95,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       ec2.Port.tcp(22),
       'SSH',
     );
-    ec2SecurityGroup.addIngressRule(
-      ec2.Peer.anyIpv4(),
-      ec2.Port.tcp(80),
-      'HTTP',
-    );
+    // ec2SecurityGroup.addIngressRule(
+    //   ec2.Peer.anyIpv4(),
+    //   ec2.Port.tcp(80),
+    //   'HTTP',
+    // );
 
 
     
@@ -118,7 +118,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   vpcSubnets: {
     //     subnets: vpc.publicSubnets
     //   },
-    //   securityGroup: albSg
+    //   securityGroup: albSg,
+    //   loadBalancerName: `alb-for-${projectName}`
     // })
     // ec2SecurityGroup.connections.allowFrom(albSg, ec2.Port.tcp(8501), 'allow http traffic from alb')
 
@@ -199,20 +200,20 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     targets.push(new elbv2_tg.InstanceTarget(appInstance));
     
 
-    const nlb = new elbv2.NetworkLoadBalancer(this, `nlb-for-${projectName}`, {
-      vpc,
-      loadBalancerName: `nlb-for-${projectName}`
-    });
+    // const nlb = new elbv2.NetworkLoadBalancer(this, `nlb-for-${projectName}`, {
+    //   vpc,
+    //   loadBalancerName: `nlb-for-${projectName}`
+    // });
 
-    const listener = nlb.addListener(`listener-${projectName}`, { port: 80 });
-    listener.addTargets('target', {
-      targets,
-      port: 80,
-    });
+    // const listener = nlb.addListener(`listener-${projectName}`, { port: 80 });
+    // listener.addTargets('target', {
+    //   targets,
+    //   port: 80,
+    // });
 
-    const httpEndpoint = new apigatewayv2.HttpApi(this, 'HttpProxyPrivateApi', {
-      defaultIntegration: new apigatewayv2_integrations.HttpNlbIntegration('DefaultIntegration', listener),
-    });
+    // const httpEndpoint = new apigatewayv2.HttpApi(this, 'HttpProxyPrivateApi', {
+    //   defaultIntegration: new apigatewayv2_integrations.HttpNlbIntegration('DefaultIntegration', listener),
+    // });
 
     // const listener = alb.addListener(`HttpListener-for-${projectName}`, {
     //   port: 80,      
