@@ -209,8 +209,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       securityGroupName: `vpclink-sg-for-${projectName}`,
       description: 'security group for vpclink'
     })
-    albSg.connections.allowFrom(vpcLinkSg, ec2.Port.tcp(80), 'allow http traffic from vpclink') // alb -> ec2
-    // vpcLinkSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone') // internet -> alb
+    albSg.connections.allowFrom(vpcLinkSg, ec2.Port.tcp(80), 'allow http traffic from vpclink') // vpc link -> alb
+    vpcLinkSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone') // internet -> vpc link
 
     const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
       vpc,
