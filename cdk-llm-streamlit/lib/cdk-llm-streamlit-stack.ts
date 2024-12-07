@@ -238,6 +238,12 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       vpcLinkName: `vpclink-for-${projectName}`
     });
 
+    api.addRoutes({
+      path: '/{proxy+}',
+      methods: [apigwv2.HttpMethod.ANY],
+      integration: new HttpAlbIntegration(`albIntegration-for-${projectName}`, listener),
+    })
+
     // const httpEndpoint = new apigwv2.HttpApi(this, 'HttpProxyPrivateApi', {
     //   defaultIntegration: new HttpServiceDiscoveryIntegration('DefaultIntegration', service, {
     //     vpcLink,
