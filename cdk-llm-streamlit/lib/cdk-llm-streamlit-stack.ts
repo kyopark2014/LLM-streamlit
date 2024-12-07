@@ -8,10 +8,13 @@ import * as cloudFront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as fs from 'fs';
 import * as path from 'path';
-import { VpcLink } from 'aws-cdk-lib/aws-apigatewayv2';
+import * as apigwv2 from 'aws-cdk-lib/aws-apigatewayv2';
 import * as apiGateway from 'aws-cdk-lib/aws-apigateway';
 import * as apigatewayv2 from 'aws-cdk-lib/aws-apigatewayv2';
 import { aws_apigatewayv2_integrations as apigatewayv2_integrations } from 'aws-cdk-lib';
+import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
+import { HttpAlbIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
+
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
 const accountId = process.env.CDK_DEFAULT_ACCOUNT;
@@ -135,24 +138,33 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   'source venv/bin/activate'
     // )
 
+
+
     // API Gateway
-    // const link = new apiGateway.VpcLink(this, 'link', {
+    //const vpc = new ec2.Vpc(this, 'VPC');
+    //const alb = new elb.ApplicationLoadBalancer(this, 'AppLoadBalancer', { vpc });
+
+
+
+
+    // const link = new apiGateway.VpcLink(this, 'link', {      
     //   targets: [alb],
     // });
 
-    // const api = new apiGateway.RestApi(this, `api-chatbot-for-${projectName}`, {
-    //   description: 'API Gateway for chatbot',
-    //   endpointTypes: [apiGateway.EndpointType.REGIONAL],
-    //   restApiName: 'rest-api-for-'+projectName,      
-    //   binaryMediaTypes: ['application/pdf', 'text/plain', 'text/csv'], 
-    //   deployOptions: {
-    //     stageName: stage,
+    // const httpApi = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
+    //   description: 'API Gateway for streamlit',
+    //   apiName: `api-for-${projectName}`,
+    //   createDefaultStage: true,
+    // });
 
-    //     // logging for debug
-    //     // loggingLevel: apiGateway.MethodLoggingLevel.INFO, 
-    //     // dataTraceEnabled: true,
+    // const integration = new apiGateway.Integration({
+    //   type: apiGateway.IntegrationType.HTTP_PROXY,
+    //   integrationHttpMethod: 'ANY',
+    //   options: {
+    //     connectionType: apiGateway.ConnectionType.VPC_LINK,
+    //     vpcLink: link,
     //   },
-    // });  
+    // });
 
     //  const integration = new apiGateway.Integration({
     //    type: apiGateway.IntegrationType.HTTP_PROXY,
@@ -208,6 +220,16 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       protocol: elbv2.ApplicationProtocol.HTTP,
       port: 80
     })
+
+    const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
+      vpc,
+      subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
+      securityGroups: [albSg],
+      vpcLinkName: `VpcLink-for-${projectName}`,
+    });
+
+    // Creating an HTTP ALB Integration:
+    // const albIntegration = new HttpAlbIntegration(`ALBIntegration-for-${projectName}`, listener);
     
     new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
       value: `http://${alb.loadBalancerDnsName}/`,
