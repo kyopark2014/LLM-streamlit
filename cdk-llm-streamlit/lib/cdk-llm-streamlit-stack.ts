@@ -199,7 +199,10 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     targets.push(new elbv2_tg.InstanceTarget(appInstance));
     
 
-    const nlb = new elbv2.NetworkLoadBalancer(this, `lb-for-${projectName}`, { vpc });
+    const nlb = new elbv2.NetworkLoadBalancer(this, `nlb-for-${projectName}`, {
+      vpc,
+      loadBalancerName: `nlb-for-${projectName}`
+    });
 
     const listener = nlb.addListener(`listener-${projectName}`, { port: 80 });
     listener.addTargets('target', {
