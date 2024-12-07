@@ -15,7 +15,7 @@ import { aws_apigatewayv2_integrations as apigatewayv2_integrations } from 'aws-
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import { HttpAlbIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import { RestApi, AwsIntegration } from 'aws-cdk-lib/aws-apigateway';
-
+import { HttpServiceDiscoveryIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
 const accountId = process.env.CDK_DEFAULT_ACCOUNT;
@@ -113,7 +113,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       description: 'security group for alb'
     })
     ec2Sg.connections.allowFrom(albSg, ec2.Port.tcp(80), 'allow http traffic from alb') // alb -> ec2
-    albSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone') // internet -> alb
+    // albSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone') // internet -> alb
     
     const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
       internetFacing: true,
@@ -212,28 +212,53 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     albSg.connections.allowFrom(vpcLinkSg, ec2.Port.tcp(80), 'allow http traffic from vpclink') // vpc link -> alb
     vpcLinkSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone') // internet -> vpc link
 
-    const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
-      vpc,
-      subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
-      securityGroups: [vpcLinkSg],
-      vpcLinkName: `VpcLink-for-${projectName}`,
-    });
+    // const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
+    //   vpc,
+    //   subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
+    //   securityGroups: [vpcLinkSg],
+    //   vpcLinkName: `VpcLink-for-${projectName}`,
+    // });
 
     const httpApi = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
       description: 'API Gateway for streamlit',
-      apiName: `api-for-${projectName}`,
+      apiName: `api-for-${projectName}`,      
       createDefaultStage: true,
     });
 
-    const integration = new apiGateway.Integration({
-      type: apiGateway.IntegrationType.HTTP_PROXY,
-      integrationHttpMethod: 'ANY',
-      options: {
-        connectionType: apiGateway.ConnectionType.VPC_LINK,
-        vpcLink: vpcLink,
-      },
+    new cdk.CfnOutput(this, `apigwUrl-for-${projectName}`, {
+      value: `${httpApi.url}`,
+      description: 'api gateway Url',
+      exportName: 'apigwUrl',
+    });   
+    
+    httpApi.addVpcLink({
+      vpc: vpc,
+      subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
+      securityGroups: [vpcLinkSg],
+      vpcLinkName: `vpclink-for-${projectName}`
     });
 
+    // const httpEndpoint = new apigwv2.HttpApi(this, 'HttpProxyPrivateApi', {
+    //   defaultIntegration: new HttpServiceDiscoveryIntegration('DefaultIntegration', service, {
+    //     vpcLink,
+    //   }),
+    // });
+
+    // const integration = new apiGateway.Integration({
+    //   type: apiGateway.IntegrationType.HTTP_PROXY,
+    //   integrationHttpMethod: 'ANY',
+    //   options: {
+    //     connectionType: apiGateway.ConnectionType.VPC_LINK,
+    //     vpcLink: vpcLink,
+    //   },
+    // });
+
+    // httpApi.addRoutes({
+    //   path: '/books',
+    //   methods: [ apigwv2.HttpMethod.ANY ],
+    //   integration: integration,
+    // });
+    // httpApi.addVpcLink(vpcLink);
 
     // Creating an HTTP ALB Integration:
     // const albIntegration = new HttpAlbIntegration(`ALBIntegration-for-${projectName}`, listener);
