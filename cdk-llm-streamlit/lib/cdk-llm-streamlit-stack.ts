@@ -95,6 +95,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       ec2.Port.tcp(22),
       'SSH',
     );
+    ec2SecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(80),
+      'HTTP',
+    );
 
 
     
@@ -113,7 +118,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   vpcSubnets: {
     //     subnets: vpc.publicSubnets
     //   },
-    //   securityGroup: albSg
+    //   securityGroup: albSg,
+    //   loadBalancerName: `alb-${projectName}`,
     // })
     // ec2SecurityGroup.connections.allowFrom(albSg, ec2.Port.tcp(8501), 'allow http traffic from alb')
 
@@ -194,18 +200,23 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     targets.push(new elbv2_tg.InstanceTarget(appInstance));
 
 
-    const nlbSg = new ec2.SecurityGroup(this, `nlb-sg-for-${projectName}`, {
-      vpc,
-      allowAllOutbound: true,
-      description: 'security group for nlb'
-    })
-    nlbSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone')
+    // const nlbSg = new ec2.SecurityGroup(this, `nlb-sg-for-${projectName}`, {
+    //   vpc,
+    //   allowAllOutbound: true,
+    //   description: 'security group for nlb'
+    // })
+    // nlbSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone')
+
+    const nlbSg = new ec2.SecurityGroup(this, `NLBSecurityGroup-${projectName}`, { 
+      vpc 
+    });
 
     const nlb = new elbv2.NetworkLoadBalancer(this, `lb-for-${projectName}`, { 
       vpc,
       vpcSubnets: {
         subnets: vpc.publicSubnets
       },
+      loadBalancerName: `nlb-${projectName}`,
       securityGroups: [nlbSg]
     });
 
