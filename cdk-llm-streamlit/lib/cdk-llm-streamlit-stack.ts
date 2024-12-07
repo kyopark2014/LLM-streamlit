@@ -105,22 +105,22 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     
 
     // ALB    
-    // const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
-    //   vpc,
-    //   allowAllOutbound: true,
-    //   description: 'security group for alb'
-    // })
-    // albSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone')
+    const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
+      vpc,
+      allowAllOutbound: true,
+      description: 'security group for alb'
+    })
+    albSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone')
 
-    // const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
-    //   internetFacing: true,
-    //   vpc,
-    //   vpcSubnets: {
-    //     subnets: vpc.publicSubnets
-    //   },
-    //   securityGroup: albSg,
-    //   loadBalancerName: `alb-for-${projectName}`
-    // })
+    const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
+      internetFacing: true,
+      vpc,
+      vpcSubnets: {
+        subnets: vpc.publicSubnets
+      },
+      securityGroup: albSg,
+      loadBalancerName: `alb-for-${projectName}`
+    })
     // ec2SecurityGroup.connections.allowFrom(albSg, ec2.Port.tcp(8501), 'allow http traffic from alb')
 
     // const userData = ec2.UserData.forLinux({
@@ -164,9 +164,9 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // });
 
     // set User Data
-    const userData = ec2.UserData.forLinux();
-    const userDataScript = fs.readFileSync(path.join(__dirname, 'userdata.sh'), 'utf8');
-    userData.addCommands(userDataScript);
+    // const userData = ec2.UserData.forLinux();
+    // const userDataScript = fs.readFileSync(path.join(__dirname, 'userdata.sh'), 'utf8');
+    // userData.addCommands(userDataScript);
 
     // EC2 instance
     const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
@@ -184,7 +184,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       // vpcSubnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),      
       securityGroup: ec2SecurityGroup,
       role: ec2Role,
-      userData: userData,
+      // userData: userData,
       blockDevices: [{
         deviceName: '/dev/xvda',
         volume: ec2.BlockDeviceVolume.ebs(8, {
@@ -215,21 +215,21 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   defaultIntegration: new apigatewayv2_integrations.HttpNlbIntegration('DefaultIntegration', listener),
     // });
 
-    // const listener = alb.addListener(`HttpListener-for-${projectName}`, {
-    //   port: 80,      
-    //   protocol: elbv2.ApplicationProtocol.HTTP
-    // })
-    // listener.addTargets(`WebEc2Target-for-${projectName}`, {
-    //   targets,
-    //   protocol: elbv2.ApplicationProtocol.HTTP,
-    //   port: 8501
-    // })
+    const listener = alb.addListener(`HttpListener-for-${projectName}`, {
+      port: 80,      
+      protocol: elbv2.ApplicationProtocol.HTTP
+    })
+    listener.addTargets(`WebEc2Target-for-${projectName}`, {
+      targets,
+      protocol: elbv2.ApplicationProtocol.HTTP,
+      port: 8501
+    })
     
-    // new cdk.CfnOutput(this, `lbUrl-for-${projectName}`, {
-    //   value: `http://${alb.loadBalancerDnsName}/`,
-    //   description: 'lbUrl',
-    //   exportName: 'lbUrl',
-    // });     
+    new cdk.CfnOutput(this, `lbUrl-for-${projectName}`, {
+      value: `http://${alb.loadBalancerDnsName}/`,
+      description: 'lbUrl',
+      exportName: 'lbUrl',
+    });     
 
     // cloudfront
     // const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
