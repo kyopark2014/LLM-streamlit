@@ -7,6 +7,9 @@
 [Amazon Bedrock Knowledge base로 30분 만에 멀티모달 RAG 챗봇 구축하기 실전 가이드](https://aws.amazon.com/ko/blogs/tech/practical-guide-for-bedrock-kb-multimodal-chatbot/)
 
 
+![image](https://github.com/user-attachments/assets/617281a0-36c7-4092-9bfc-9c3359dba6b9)
+
+
 ## htts로 streamlit 연결하기
 
 [Serverless Streamlit app on AWS with HTTPS](https://kawsaur.medium.com/serverless-streamlit-app-on-aws-with-https-b5e5ff889590)를 참조합니다. 이 repo를 보면 CloudFront뒤에 ALB를 놓고 포트를 80으로 열고 있습니다.
