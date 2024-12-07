@@ -124,7 +124,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       securityGroup: albSg,
       loadBalancerName: `alb-for-${projectName}`
     })
-   
+    alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
     // const userData = ec2.UserData.forLinux({
     //   shebang: '#!/usr/bash',
@@ -185,6 +185,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       detailedMonitoring: true,
       instanceInitiatedShutdownBehavior: ec2.InstanceInitiatedShutdownBehavior.TERMINATE,
     }); 
+    appInstance.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
     const targets: elbv2_tg.InstanceTarget[] = new Array();
     targets.push(new elbv2_tg.InstanceTarget(appInstance));
