@@ -14,6 +14,7 @@ import * as apigatewayv2 from 'aws-cdk-lib/aws-apigatewayv2';
 import { aws_apigatewayv2_integrations as apigatewayv2_integrations } from 'aws-cdk-lib';
 import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import { HttpAlbIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
+import { RestApi, AwsIntegration } from 'aws-cdk-lib/aws-apigateway';
 
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
@@ -149,29 +150,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   targets: [alb],
     // });
 
-    // const httpApi = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
-    //   description: 'API Gateway for streamlit',
-    //   apiName: `api-for-${projectName}`,
-    //   createDefaultStage: true,
-    // });
 
-    // const integration = new apiGateway.Integration({
-    //   type: apiGateway.IntegrationType.HTTP_PROXY,
-    //   integrationHttpMethod: 'ANY',
-    //   options: {
-    //     connectionType: apiGateway.ConnectionType.VPC_LINK,
-    //     vpcLink: link,
-    //   },
-    // });
-
-    //  const integration = new apiGateway.Integration({
-    //    type: apiGateway.IntegrationType.HTTP_PROXY,
-    //   integrationHttpMethod: 'ANY',
-    //   options: {
-    //     connectionType: apiGateway.ConnectionType.VPC_LINK,
-    //     vpcLink: link,
-    //   },
-    // });
 
     // set User Data
     // const userData = ec2.UserData.forLinux();
@@ -209,7 +188,9 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     const targets: elbv2_tg.InstanceTarget[] = new Array();
     targets.push(new elbv2_tg.InstanceTarget(appInstance));
 
-    const listener = alb.addListener(`HttpListener-for-${projectName}`, {
+
+
+    const listener = alb.addListener(`HttpListener-for-${projectName}`, {      
       port: 80,      
       protocol: elbv2.ApplicationProtocol.HTTP
     })
@@ -225,6 +206,22 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       securityGroups: [albSg],
       vpcLinkName: `VpcLink-for-${projectName}`,
     });
+
+    const httpApi = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
+      description: 'API Gateway for streamlit',
+      apiName: `api-for-${projectName}`,
+      createDefaultStage: true,
+    });
+
+    const integration = new apiGateway.Integration({
+      type: apiGateway.IntegrationType.HTTP_PROXY,
+      integrationHttpMethod: 'ANY',
+      options: {
+        connectionType: apiGateway.ConnectionType.VPC_LINK,
+        vpcLink: vpcLink,
+      },
+    });
+
 
     // Creating an HTTP ALB Integration:
     // const albIntegration = new HttpAlbIntegration(`ALBIntegration-for-${projectName}`, listener);
