@@ -6,8 +6,7 @@
 
 [Amazon Bedrock Knowledge base로 30분 만에 멀티모달 RAG 챗봇 구축하기 실전 가이드](https://aws.amazon.com/ko/blogs/tech/practical-guide-for-bedrock-kb-multimodal-chatbot/)
 
-
-![image](https://github.com/user-attachments/assets/617281a0-36c7-4092-9bfc-9c3359dba6b9)
+<img src="https://github.com/user-attachments/assets/617281a0-36c7-4092-9bfc-9c3359dba6b9" width="700">
 
 
 ## htts로 streamlit 연결하기
