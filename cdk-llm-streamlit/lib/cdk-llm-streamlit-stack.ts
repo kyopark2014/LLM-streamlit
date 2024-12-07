@@ -207,9 +207,9 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // })
     // nlbSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone')
 
-    const nlbSg = new ec2.SecurityGroup(this, `NLBSecurityGroup-${projectName}`, { 
-      vpc 
-    });
+    // const nlbSg = new ec2.SecurityGroup(this, `NLBSecurityGroup-${projectName}`, { 
+    //   vpc 
+    // });
 
     const nlb = new elbv2.NetworkLoadBalancer(this, `lb-for-${projectName}`, { 
       vpc,
@@ -217,7 +217,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
         subnets: vpc.publicSubnets
       },
       loadBalancerName: `nlb-${projectName}`,
-      securityGroups: [nlbSg]
+      // securityGroups: [nlbSg]
     });
 
     const listener = nlb.addListener(`listener-${projectName}`, { port: 80 });
