@@ -219,19 +219,19 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   vpcLinkName: `VpcLink-for-${projectName}`,
     // });
 
-    const httpApi = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
+    const api = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
       description: 'API Gateway for streamlit',
       apiName: `api-for-${projectName}`,      
       createDefaultStage: true,
     });
 
     new cdk.CfnOutput(this, `apigwUrl-for-${projectName}`, {
-      value: `${httpApi.url}`,
+      value: `${api.url}`,
       description: 'api gateway Url',
       exportName: 'apigwUrl',
     });   
     
-    httpApi.addVpcLink({
+    api.addVpcLink({
       vpc: vpc,
       subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
       securityGroups: [vpcLinkSg],
