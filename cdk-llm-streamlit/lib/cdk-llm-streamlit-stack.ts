@@ -104,13 +104,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   'HTTP',
     // );
 
-
-    
-
     // ALB    
     const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
       vpc,
       allowAllOutbound: true,
+      securityGroupName: `alb-sg-for-${projectName}`,
       description: 'security group for alb'
     })
     albSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone')
