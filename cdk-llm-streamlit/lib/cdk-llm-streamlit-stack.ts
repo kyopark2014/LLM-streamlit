@@ -20,7 +20,7 @@ const projectName = `llm-streamlit`;
 const region = process.env.CDK_DEFAULT_REGION;    
 const accountId = process.env.CDK_DEFAULT_ACCOUNT;
 const stage = 'dev';
-const targetPort = 8501;
+const targetPort = 80;
 
 export class CdkLlmStreamlitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
