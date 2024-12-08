@@ -20,6 +20,7 @@ const projectName = `llm-streamlit`;
 const region = process.env.CDK_DEFAULT_REGION;    
 const accountId = process.env.CDK_DEFAULT_ACCOUNT;
 const stage = 'dev';
+const targetPort = 8501;
 
 export class CdkLlmStreamlitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -112,8 +113,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       securityGroupName: `alb-sg-for-${projectName}`,
       description: 'security group for alb'
     })
-    ec2Sg.connections.allowFrom(albSg, ec2.Port.tcp(80), 'allow http traffic from alb') // alb -> ec2
-    // albSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone') // internet -> alb
+    ec2Sg.connections.allowFrom(albSg, ec2.Port.tcp(targetPort), 'allow traffic from alb') // alb -> ec2
     
     const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
       // internetFacing: true,
@@ -147,14 +147,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       'sudo service nginx start',
       'git clone https://github.com/kyopark2014/llm-streamlit'
     );
-
-    // API Gateway
-    //const vpc = new ec2.Vpc(this, 'VPC');
-    //const alb = new elb.ApplicationLoadBalancer(this, 'AppLoadBalancer', { vpc });
-
-    // const link = new apiGateway.VpcLink(this, 'link', {      
-    //   targets: [alb],
-    // });
 
     // set User Data
     // const userData = ec2.UserData.forLinux();
@@ -192,8 +184,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     const targets: elbv2_tg.InstanceTarget[] = new Array();
     targets.push(new elbv2_tg.InstanceTarget(appInstance));
 
-
-
     const listener = alb.addListener(`HttpListener-for-${projectName}`, {      
       port: 80,      
       protocol: elbv2.ApplicationProtocol.HTTP
@@ -201,9 +191,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     listener.addTargets(`WebEc2Target-for-${projectName}`, {
       targets,
       protocol: elbv2.ApplicationProtocol.HTTP,
-      port: 80
+      port: targetPort
     })
-
 
     // VPC Link Security Group    
     const vpcLinkSg = new ec2.SecurityGroup(this, `vpclink-sg-for-${projectName}`, {
@@ -212,11 +201,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       securityGroupName: `vpclink-sg-for-${projectName}`,
       description: 'security group for vpclink'
     })
-    // albSg.connections.allowFrom(vpcLinkSg, ec2.Port.tcp(80), 'allow http traffic from vpclink') // vpc link -> alb
-    //vpcLinkSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone') // internet -> vpc link
-
-    // vpcLinkSg.connections.allowFrom(albSg, ec2.Port.tcp(80), 'allow http traffic from alb') // vpc link -> alb
-    
 
     const api = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
       description: 'API Gateway for streamlit',
@@ -256,51 +240,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       integration: proxyIntegration
     })
 
-    // const httpEndpoint = new apigwv2.HttpApi(this, 'HttpProxyPrivateApi', {
-    //   defaultIntegration: new HttpServiceDiscoveryIntegration('DefaultIntegration', service, {
-    //     vpcLink,
-    //   }),
-    // });
-
-    // const integration = new apiGateway.Integration({
-    //   type: apiGateway.IntegrationType.HTTP_PROXY,
-    //   integrationHttpMethod: 'ANY',
-    //   options: {
-    //     connectionType: apiGateway.ConnectionType.VPC_LINK,
-    //     vpcLink: vpcLink,
-    //   },
-    // });
-
-    // httpApi.addRoutes({
-    //   path: '/books',
-    //   methods: [ apigwv2.HttpMethod.ANY ],
-    //   integration: integration,
-    // });
-    // httpApi.addVpcLink(vpcLink);
-
-    // Creating an HTTP ALB Integration:
-    // const albIntegration = new HttpAlbIntegration(`ALBIntegration-for-${projectName}`, listener);
-    
     new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
       value: `http://${alb.loadBalancerDnsName}/`,
       description: 'albUrl',
       exportName: 'albUrl',
     });     
-
-    // const nlb = new elbv2.NetworkLoadBalancer(this, `nlb-for-${projectName}`, {
-    //   vpc,
-    //   loadBalancerName: `nlb-for-${projectName}`
-    // });
-
-    // const listener = nlb.addListener(`listener-${projectName}`, { port: 80 });
-    // listener.addTargets('target', {
-    //   targets,
-    //   port: 80,
-    // });
-
-    // const httpEndpoint = new apigatewayv2.HttpApi(this, 'HttpProxyPrivateApi', {
-    //   defaultIntegration: new apigatewayv2_integrations.HttpNlbIntegration('DefaultIntegration', listener),
-    // });
 
     // cloudfront
     // const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
@@ -342,3 +286,18 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //       compress=False
     //   ),
     // );
+
+    // const nlb = new elbv2.NetworkLoadBalancer(this, `nlb-for-${projectName}`, {
+    //   vpc,
+    //   loadBalancerName: `nlb-for-${projectName}`
+    // });
+
+    // const listener = nlb.addListener(`listener-${projectName}`, { port: 80 });
+    // listener.addTargets('target', {
+    //   targets,
+    //   port: 80,
+    // });
+
+    // const httpEndpoint = new apigatewayv2.HttpApi(this, 'HttpProxyPrivateApi', {
+    //   defaultIntegration: new apigatewayv2_integrations.HttpNlbIntegration('DefaultIntegration', listener),
+    // });
