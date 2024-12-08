@@ -171,7 +171,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       // machineImage: ec2.MachineImage.latestAmazonLinux2023(),
       vpc: vpc,
       vpcSubnets: {
-        subnets: vpc.publicSubnets  // vpc.privateSubnets
+        subnets: vpc.privateSubnets // publicSubnets  // vpc.privateSubnets
       },
       securityGroup: ec2Sg,
       role: ec2Role,
