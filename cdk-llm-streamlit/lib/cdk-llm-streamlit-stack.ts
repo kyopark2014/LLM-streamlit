@@ -107,7 +107,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
 
     // ALB    
     const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
-      vpc,
+      vpc: vpc,
       allowAllOutbound: true,
       securityGroupName: `alb-sg-for-${projectName}`,
       description: 'security group for alb'
@@ -117,7 +117,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     
     const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
       internetFacing: true,
-      vpc,
+      vpc: vpc,
       vpcSubnets: {
         subnets: vpc.publicSubnets
       },
@@ -213,12 +213,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     albSg.connections.allowFrom(vpcLinkSg, ec2.Port.tcp(80), 'allow http traffic from vpclink') // vpc link -> alb
     vpcLinkSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone') // internet -> vpc link
 
-    const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
-      vpc,
-      subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
-      securityGroups: [vpcLinkSg],
-      vpcLinkName: `VpcLink-for-${projectName}`,
-    });
+    // vpcLinkSg.connections.allowFrom(albSg, ec2.Port.tcp(80), 'allow http traffic from alb') // vpc link -> alb
+    
 
     const api = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
       description: 'API Gateway for streamlit',
@@ -232,11 +228,19 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       exportName: 'apigwUrl',
     });   
     
-    api.addVpcLink({
-      vpc: vpc,
-      subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
+    // api.addVpcLink({
+    //   vpc: vpc,
+    //   subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
+    //   securityGroups: [vpcLinkSg],
+    //   vpcLinkName: `vpclink-for-${projectName}`
+    // });
+
+    const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
+      vpc,
+      // subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
+      subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS}),
       securityGroups: [vpcLinkSg],
-      vpcLinkName: `vpclink-for-${projectName}`
+      vpcLinkName: `VpcLink-for-${projectName}`,
     });
 
     const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, alb.listeners[0], {
