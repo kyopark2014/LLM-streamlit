@@ -119,7 +119,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       internetFacing: true,
       vpc: vpc,
       vpcSubnets: {
-        subnets: vpc.privateSubnets // vpc.publicSubnets 
+        subnets: vpc.publicSubnets
       },
       securityGroup: albSg,
       loadBalancerName: `alb-for-${projectName}`
@@ -206,7 +206,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
 
     // VPC Link Security Group    
     const vpcLinkSg = new ec2.SecurityGroup(this, `vpclink-sg-for-${projectName}`, {
-      vpc,
+      vpc,      
       allowAllOutbound: true,
       securityGroupName: `vpclink-sg-for-${projectName}`,
       description: 'security group for vpclink'
