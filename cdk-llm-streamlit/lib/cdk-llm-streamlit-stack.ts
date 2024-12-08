@@ -126,34 +126,35 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     })
     alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
-    const userData = ec2.UserData.forLinux({
-      shebang: '#!/usr/bash',
-    })
-    userData.addCommands(
-      'sudo yum install nginx',
-      'sudo service nginx start'
-    )
+    // const userData = ec2.UserData.forLinux({
+    //   shebang: '#!/usr/bash',
+    // })
+    // userData.addCommands(
+    //   'sudo yum install nginx',
+    //   'sudo service nginx start'
+    // )
     // 'sudo yum install git python-pip -y',
     //   'pip install pip --upgrade',
     //   'pip install streamlit boto3',
     //   'git clone https://github.com/kyopark2014/llm-streamlit',
     //   'python3 -m venv venv',
     //   'source venv/bin/activate'
-
-
+    const userData = ec2.UserData.forLinux();
+    // const userDataScript = fs.readFileSync(path.join(__dirname, 'userdata.sh'), 'utf8');
+    // userData.addCommands(userDataScript);
+    userData.addCommands(
+      'sudo yum install nginx',
+      'sudo service nginx start',
+      'git clone https://github.com/kyopark2014/llm-streamlit'
+    );
 
     // API Gateway
     //const vpc = new ec2.Vpc(this, 'VPC');
     //const alb = new elb.ApplicationLoadBalancer(this, 'AppLoadBalancer', { vpc });
 
-
-
-
     // const link = new apiGateway.VpcLink(this, 'link', {      
     //   targets: [alb],
     // });
-
-
 
     // set User Data
     // const userData = ec2.UserData.forLinux();
@@ -175,7 +176,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       },
       securityGroup: ec2Sg,
       role: ec2Role,
-      // userData: userData,
+      userData: userData,
       blockDevices: [{
         deviceName: '/dev/xvda',
         volume: ec2.BlockDeviceVolume.ebs(8, {
