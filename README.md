@@ -2,9 +2,6 @@
 
 아래 내용은 라이브러리등이 너무 오래돼서 아래를 참조하는것이 더 좋을것 같습니다.
 
-[CDK Example](https://github.com/aws-samples/kr-tech-blog-sample-code/tree/main/cdk_bedrock_rag_chatbot/lib)
-
-[Amazon Bedrock Knowledge base로 30분 만에 멀티모달 RAG 챗봇 구축하기 실전 가이드](https://aws.amazon.com/ko/blogs/tech/practical-guide-for-bedrock-kb-multimodal-chatbot/)
 
 <img src="https://github.com/user-attachments/assets/1ae3d25b-fb9d-4109-8b87-b7a85bd8b795" width="700">
 
@@ -182,6 +179,10 @@ sudo python3 -m pip install --upgrade pip
 ```
 
 ## Reference 
+
+[Amazon Bedrock Knowledge base로 30분 만에 멀티모달 RAG 챗봇 구축하기 실전 가이드](https://aws.amazon.com/ko/blogs/tech/practical-guide-for-bedrock-kb-multimodal-chatbot/)
+
+[CDK-Ubuntu Steamlit](https://github.com/aws-samples/kr-tech-blog-sample-code/tree/main/cdk_bedrock_rag_chatbot/lib)
 
 [Github - Welcome to Streamlit](https://github.com/streamlit/streamlit)
 
