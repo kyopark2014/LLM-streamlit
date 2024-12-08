@@ -1,4 +1,4 @@
-# Amazon Bedrock을 위한 Streamlit 환경 구성 
+# Streamlit 환경 구성 
 
 - Streamlit으로 https를 이용하기 위하여 CloudFront - API GW - VPC Link - ALB - EC2로 구성하여 streamlit을 실행하였으니 브라우저에 화면이 제대로 보여지지 않아서 확인중입니다. 
 
