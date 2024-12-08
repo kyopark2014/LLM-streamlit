@@ -138,6 +138,12 @@ st.subheader('this is subheader')
 input_text = st.text_input('**Chat with me**', key='text')
 ```
 
+
+## Resorces의 정리
+
+[Endpoints Console](https://us-west-2.console.aws.amazon.com/vpcconsole/home?region=us-west-2#Endpoints:)에서 vpce를 삭제합니다.
+
+
 ## Reference 
 
 [Amazon Bedrock Knowledge base로 30분 만에 멀티모달 RAG 챗봇 구축하기 실전 가이드](https://aws.amazon.com/ko/blogs/tech/practical-guide-for-bedrock-kb-multimodal-chatbot/)
