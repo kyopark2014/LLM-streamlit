@@ -119,7 +119,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       internetFacing: true,
       vpc: vpc,
       vpcSubnets: {
-        subnets: vpc.publicSubnets
+        subnets: vpc.privateSubnets // publicSubnets
       },
       securityGroup: albSg,
       loadBalancerName: `alb-for-${projectName}`
