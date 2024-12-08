@@ -119,8 +119,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       internetFacing: true,
       vpc: vpc,
       vpcSubnets: {
-        // subnets: vpc.publicSubnets
-        subnets: vpc.privateSubnets
+        subnets: vpc.privateSubnets // vpc.publicSubnets
       },
       securityGroup: albSg,
       loadBalancerName: `alb-for-${projectName}`
@@ -170,10 +169,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       // machineImage: ec2.MachineImage.latestAmazonLinux2023(),
       vpc: vpc,
       vpcSubnets: {
-        // subnets: vpc.publicSubnets
-        subnets: vpc.privateSubnets
+        subnets: vpc.publicSubnets  // vpc.privateSubnets
       },
-      // vpcSubnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),      
       securityGroup: ec2Sg,
       role: ec2Role,
       // userData: userData,
