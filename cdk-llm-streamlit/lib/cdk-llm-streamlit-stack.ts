@@ -126,17 +126,19 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     })
     alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
-    // const userData = ec2.UserData.forLinux({
-    //   shebang: '#!/usr/bash',
-    // })
-    // userData.addCommands(
-    //   'sudo yum install git python-pip -y',
+    const userData = ec2.UserData.forLinux({
+      shebang: '#!/usr/bash',
+    })
+    userData.addCommands(
+      'sudo yum install nginx',
+      'sudo service nginx start'
+    )
+    // 'sudo yum install git python-pip -y',
     //   'pip install pip --upgrade',
     //   'pip install streamlit boto3',
     //   'git clone https://github.com/kyopark2014/llm-streamlit',
     //   'python3 -m venv venv',
     //   'source venv/bin/activate'
-    // )
 
 
 
