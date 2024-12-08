@@ -213,12 +213,12 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     albSg.connections.allowFrom(vpcLinkSg, ec2.Port.tcp(80), 'allow http traffic from vpclink') // vpc link -> alb
     vpcLinkSg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'allow http traffic from anyone') // internet -> vpc link
 
-    // const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
-    //   vpc,
-    //   subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
-    //   securityGroups: [vpcLinkSg],
-    //   vpcLinkName: `VpcLink-for-${projectName}`,
-    // });
+    const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
+      vpc,
+      subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
+      securityGroups: [vpcLinkSg],
+      vpcLinkName: `VpcLink-for-${projectName}`,
+    });
 
     const api = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
       description: 'API Gateway for streamlit',
@@ -239,10 +239,15 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       vpcLinkName: `vpclink-for-${projectName}`
     });
 
+    const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, alb.listeners[0], {
+      vpcLink: vpcLink
+    })
+
     api.addRoutes({
       path: '/{proxy+}',
       methods: [apigwv2.HttpMethod.ANY],
-      integration: new HttpAlbIntegration(`albIntegration-for-${projectName}`, listener),
+      // integration: new HttpAlbIntegration(`albIntegration-for-${projectName}`, listener),
+      integration: proxyIntegration
     })
 
     // const httpEndpoint = new apigwv2.HttpApi(this, 'HttpProxyPrivateApi', {
