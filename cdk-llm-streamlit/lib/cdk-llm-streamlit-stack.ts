@@ -9,6 +9,7 @@ import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as autoscaling from 'aws-cdk-lib/aws-autoscaling'
+import { RedirectProtocol } from 'aws-cdk-lib/aws-s3';
 
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
@@ -218,11 +219,52 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   healthCheck: autoscaling.HealthCheck.ec2()
     // });
 
+    // const my_target_group = elbv2.ListenerAction.fixedResponse(200, {
+    //   messageBody: 'OK',
+    //   contentType: 'text/plain'
+    // })
+
+    const default_group =elbv2.ListenerAction.redirect({
+      host: distribution.domainName, 
+      path: "/", 
+      permanent: true, 
+      port: "443", 
+      protocol: "HTTPS"
+    })
+
     const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
       port: 80,      
-      protocol: elbv2.ApplicationProtocol.HTTP,
-      
-    })
+      protocol: elbv2.ApplicationProtocol.HTTP,      
+      defaultAction: default_group
+    });
+    
+    // listener.addAction(`RedirectHttpListener-for-${projectName}`, {
+    //   action: action,
+    //   conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
+    //   priority: 1,
+    // })
+    // listener.addAction('DefaultAction', {
+    //   action: elbv2.ListenerAction.fixedResponse(404, {
+    //     contentType: "text/html",
+    //     messageBody: 'Cannot route your request; no matching project found.',
+    //   }),
+    // });
+
+    // const demoTargetGroup = listener.addTargets("demoTargetGroup", {
+    //   port: 80,
+    //   priority: 10,
+    //   protocol: elbv2.ApplicationProtocol.HTTP,  
+    //   conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
+    //   targetGroupName: "demoTargetGroup",
+    //   healthCheck: {
+    //       path: "/content/de.html",
+    //   }
+    // });
+    // listener.addTargetGroups("demoTargetGroupInt", {
+    //     targetGroups: [demoTargetGroup]
+    // })
+    
+    // elbv2.ListenerAction.redirect({ permanent: true, port: '443', protocol: 'HTTPS' })
           
     listener.addTargets(`WebEc2Target-for-${projectName}`, {
       targets,
