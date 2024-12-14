@@ -188,7 +188,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     })*/
 
     // cloudfront
-    const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
+   /* const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
       comment: "CloudFront distribution for Streamlit frontend application",
       defaultBehavior: {
         origin: new origins.LoadBalancerV2Origin(alb, {
@@ -212,7 +212,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
       value: 'https://'+distribution.domainName+'/',      
       description: 'The web url of request for chat',
-    });     
+    });     */
   }
 }
     // const cloudfront_distribution = cloudFront.Distribution(this, "StreamLitCloudFrontDistribution",
