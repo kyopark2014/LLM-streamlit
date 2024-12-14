@@ -226,6 +226,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
           
     listener.addTargets(`WebEc2Target-for-${projectName}`, {
       targets,
+      priority: 1,
       conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
       protocol: elbv2.ApplicationProtocol.HTTP,
       port: targetPort
