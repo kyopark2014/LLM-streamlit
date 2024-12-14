@@ -8,6 +8,8 @@ import * as cloudFront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as autoscaling from 'aws-cdk-lib/aws-autoscaling'
+
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
 const accountId = process.env.CDK_DEFAULT_ACCOUNT;
@@ -176,18 +178,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
 
     const targets: elbv2_tg.InstanceTarget[] = new Array();
     targets.push(new elbv2_tg.InstanceTarget(appInstance));
-
-    const listener = alb.addListener(`HttpListener-for-${projectName}`, {      
-      port: 80,      
-      protocol: elbv2.ApplicationProtocol.HTTP
-    })
-    listener.addTargets(`WebEc2Target-for-${projectName}`, {
-      targets,
-      protocol: elbv2.ApplicationProtocol.HTTP,
-      port: targetPort
-    })
-
+    
     // cloudfront
+    const custom_header_name = "X-Verify-Origin"
+    const custom_header_value = this.stackName+"_StreamLitCloudFrontDistribution"
+
     const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
       comment: "CloudFront distribution for Streamlit frontend application",
       defaultBehavior: {
@@ -195,6 +190,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
           protocolPolicy: cloudFront.OriginProtocolPolicy.HTTP_ONLY,
           httpPort: 80,
           originPath: "/",
+          customHeaders: { [custom_header_name] : custom_header_value }
         }),
         allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,
         cachePolicy: cloudFront.CachePolicy.CACHING_DISABLED,
@@ -202,6 +198,49 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       },
       priceClass: cloudFront.PriceClass.PRICE_CLASS_200,  
     });
+
+    // const autoScalingGroup = new autoscaling.AutoScalingGroup(this, 'AutoScalingGroup', {      
+    //   autoScalingGroupName: `asg-for-${projectName}`,
+    //   instanceType: new ec2.InstanceType('t2.small'),
+    //   machineImage: new ec2.AmazonLinuxImage({
+    //     generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2023
+    //   }), 
+    //   vpc: vpc, 
+    //   vpcSubnets: {
+    //     subnets: vpc.publicSubnets  
+    //   },
+    //   securityGroup: ec2Sg,
+    //   role: ec2Role,
+    //   allowAllOutbound: true,
+    //   minCapacity: 1,
+    //   maxCapacity: 1,
+    //   desiredCapacity: 1,
+    //   healthCheck: autoscaling.HealthCheck.ec2()
+    // });
+
+    const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
+      port: 80,      
+      protocol: elbv2.ApplicationProtocol.HTTP,
+      
+    })
+          
+    listener.addTargets(`WebEc2Target-for-${projectName}`, {
+      targets,
+      conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
+      protocol: elbv2.ApplicationProtocol.HTTP,
+      port: targetPort
+    })
+
+
+
+    // new elbv2.ApplicationListenerRule(this, 'RedirectApplicationListenerRule', {
+    //   listener: listener,
+    //   priority: 5,
+    
+    //   // the properties below are optional
+    //   conditions: [elbv2.ListenerCondition.pathPatterns(["*"])],
+    //   action: elbv2.ListenerAction.redirect()
+    // });
 
     new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
       value: `http://${alb.loadBalancerDnsName}/`,
