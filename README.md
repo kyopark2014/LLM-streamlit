@@ -1,16 +1,16 @@
 # Streamlit 환경 구성 
 
-- Streamlit으로 https를 이용하기 위하여 CloudFront - API GW - VPC Link - ALB - EC2로 구성하여 streamlit을 실행하였으니 브라우저에 화면이 제대로 보여지지 않아서 확인중입니다. 
+여기서는 Streamlit을 https를 이용하기 위하여 CloudFront - ALB - EC2로 구성하는 방법을 설명합니다. 
 
-- NLM - EC2로 구성하면 외부에서 접속하여 사용할 수 있으나, AWS는 정책적으로 비추하고 있습니다.
+## System Architecture 
 
-<img src="https://github.com/user-attachments/assets/1ae3d25b-fb9d-4109-8b87-b7a85bd8b795" width="700">
+이때의 Architecture는 아래와 같습니다. 
 
-## htts로 streamlit 연결하기
+<img width="675" alt="image" src="https://github.com/user-attachments/assets/147eda56-6934-40d4-a0de-37a9828f2f65" />
 
-[Serverless Streamlit app on AWS with HTTPS](https://kawsaur.medium.com/serverless-streamlit-app-on-aws-with-https-b5e5ff889590)를 참조합니다. 이 repo를 보면 CloudFront뒤에 ALB를 놓고 포트를 80으로 열고 있습니다.
+### htts로 streamlit 연결하기
 
-[frontend_stack.py](https://github.com/kawsark/streamlit-serverless/blob/main/streamlit_serverless_app/frontend_stack.py)에서는 아래와 같이 origin을 정의합니다. 
+[Serverless Streamlit app on AWS with HTTPS](https://kawsaur.medium.com/serverless-streamlit-app-on-aws-with-https-b5e5ff889590)를 참조합니다. 이 repo를 보면 CloudFront뒤에 ALB를 놓고 포트를 80으로 열고 있습니다. [frontend_stack.py](https://github.com/kawsark/streamlit-serverless/blob/main/streamlit_serverless_app/frontend_stack.py)에서는 아래와 같이 origin을 정의합니다. 
 
 ```python
 origin=origins.LoadBalancerV2Origin(fargate_service.load_balancer, 
@@ -20,14 +20,9 @@ origin=origins.LoadBalancerV2Origin(fargate_service.load_balancer,
  custom_headers = { custom_header_name : custom_header_value } ),
 ```
 
-CloudFront - ALB - EC2로 하면 외부에서 cloudfront의 domain으로 접속시 https로 접속하게 됩니다.
-
-## streamlit을 system으로 실행
-
 [Running streamlit as a System Service](https://medium.com/@stevenjlm/running-streamlit-on-amazon-ec2-with-https-f20e38fffbe7)와 같이 service로 사용합니다.
 
-
-## LB - EC2 연결
+### LB - EC2 연결 예제
 
 이때의 CDK는 아래와 같이 구성합니다.
 
@@ -77,17 +72,7 @@ const httpEndpoint = new apigatewayv2.HttpApi(this, 'HttpProxyPrivateApi', {
 });
 ```
 
-## 설치 및 실행
-
-
-### Cloud9 실행환경
-
-[Cloud9 console](https://ap-northeast-2.console.aws.amazon.com/cloud9control/home?region=ap-northeast-2#/)에서 [Create environment]를 선택하여 Cloud9을 생성합니다.
-
-[EC2 Console](https://ap-northeast-2.console.aws.amazon.com/ec2/home?region=ap-northeast-2#Instances:instanceState=running)에서 Cloud9이 설치된 EC2를 찾은 후에, 아래와 같이 Security Group의 inbound rule에서 8501을 Open합니다.
-
-![image](https://github.com/kyopark2014/LLM-streamlit/assets/52392004/1a451dd0-92d3-465e-80e2-144c0fa65d8b)
-
+## Streamlit
 
 ### Streamlit 실행 
 
@@ -117,9 +102,9 @@ streamlit run titan.py
 ![image](https://github.com/kyopark2014/LLM-streamlit/assets/52392004/aa63a2c2-942e-4234-9928-d051f70e3a63)
 
 
-## 예제
+### 예제
 
-### Title
+#### Title
 title, head, subheader는 아래와 같이 사용합니다.
 
 ```python
@@ -132,14 +117,15 @@ st.subheader('this is subheader')
 
 ![image](https://github.com/kyopark2014/LLM-streamlit/assets/52392004/e0f94a88-8f58-4ebd-9e5f-966085621114)
 
-### 입력창
+#### 입력창
 
 ```python
 input_text = st.text_input('**Chat with me**', key='text')
 ```
 
+## 설치 및 실행
 
-## Resorces의 정리
+### Resorces의 삭제
 
 [Endpoints Console](https://us-west-2.console.aws.amazon.com/vpcconsole/home?region=us-west-2#Endpoints:)에서 vpce를 삭제합니다.
 
