@@ -113,10 +113,6 @@ st.header('this is header')
 st.subheader('this is subheader')
 ```
 
-이때의 결과는 아래와 같습니다.
-
-![image](https://github.com/kyopark2014/LLM-streamlit/assets/52392004/e0f94a88-8f58-4ebd-9e5f-966085621114)
-
 #### 입력창
 
 ```python
