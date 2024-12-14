@@ -98,7 +98,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // );
 
     // ALB    
-    const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
+    /* const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
       vpc: vpc,
       allowAllOutbound: true,
       securityGroupName: `alb-sg-for-${projectName}`,
@@ -115,7 +115,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       securityGroup: albSg,
       loadBalancerName: `alb-for-${projectName}`
     })
-    alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
+    alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY); */
 
 
 
@@ -177,7 +177,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     const targets: elbv2_tg.InstanceTarget[] = new Array();
     targets.push(new elbv2_tg.InstanceTarget(appInstance));
 
-    const listener = alb.addListener(`HttpListener-for-${projectName}`, {      
+    /*const listener = alb.addListener(`HttpListener-for-${projectName}`, {      
       port: 80,      
       protocol: elbv2.ApplicationProtocol.HTTP
     })
@@ -185,7 +185,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       targets,
       protocol: elbv2.ApplicationProtocol.HTTP,
       port: targetPort
-    })
+    })*/
 
     // cloudfront
     const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
