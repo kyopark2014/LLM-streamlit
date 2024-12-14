@@ -8,18 +8,9 @@ import * as cloudFront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as apigwv2 from 'aws-cdk-lib/aws-apigatewayv2';
-import * as apiGateway from 'aws-cdk-lib/aws-apigateway';
-import * as apigatewayv2 from 'aws-cdk-lib/aws-apigatewayv2';
-import { aws_apigatewayv2_integrations as apigatewayv2_integrations } from 'aws-cdk-lib';
-import { HttpLambdaIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
-import { HttpAlbIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
-import { RestApi, AwsIntegration } from 'aws-cdk-lib/aws-apigateway';
-import { HttpServiceDiscoveryIntegration } from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
 const accountId = process.env.CDK_DEFAULT_ACCOUNT;
-const stage = 'dev';
 const targetPort = 80;
 
 export class CdkLlmStreamlitStack extends cdk.Stack {
@@ -168,7 +159,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       },
       securityGroup: ec2Sg,
       role: ec2Role,
-      userData: userData,
+      // userData: userData,
       blockDevices: [{
         deviceName: '/dev/xvda',
         volume: ec2.BlockDeviceVolume.ebs(8, {
@@ -194,79 +185,26 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       port: targetPort
     })
 
-    // VPC Link Security Group    
-    const vpcLinkSg = new ec2.SecurityGroup(this, `vpclink-sg-for-${projectName}`, {
-      vpc,      
-      allowAllOutbound: true,
-      securityGroupName: `vpclink-sg-for-${projectName}`,
-      description: 'security group for vpclink'
-    })
-
-    const api = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
-      description: 'API Gateway for streamlit',
-      apiName: `api-for-${projectName}`,      
-      createDefaultStage: true,
-    });
-
-    new cdk.CfnOutput(this, `apigwUrl-for-${projectName}`, {
-      value: `${api.url}`,
-      description: 'api gateway Url',
-      exportName: 'apigwUrl',
-    });   
-    
-    // api.addVpcLink({
-    //   vpc: vpc,
-    //   subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
-    //   securityGroups: [vpcLinkSg],
-    //   vpcLinkName: `vpclink-for-${projectName}`
-    // });
-
-    const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
-      vpc,
-      // subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
-      subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS}),
-      securityGroups: [vpcLinkSg],
-      vpcLinkName: `VpcLink-for-${projectName}`,
-    });
-
-    const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, alb.listeners[0], {
-      vpcLink: vpcLink
-    })
-
-    api.addRoutes({
-      path: '/{proxy+}',
-      methods: [apigwv2.HttpMethod.ANY],
-      // integration: new HttpAlbIntegration(`albIntegration-for-${projectName}`, listener),
-      integration: proxyIntegration
-    })
-
-    new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
-      value: `http://${alb.loadBalancerDnsName}/`,
-      description: 'albUrl',
-      exportName: 'albUrl',
-    });     
-
     // cloudfront
-    // const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
-    //   comment: "CloudFront distribution for Streamlit frontend application",
-    //   defaultBehavior: {
-    //     origin: new origins.LoadBalancerV2Origin(alb, {
-    //       protocolPolicy: cloudFront.OriginProtocolPolicy.HTTP_ONLY,
-    //       httpPort: 80,
-    //       originPath: "/",
-    //       // customHeaders: { 'X-Origin-Verify' : 'a12345678' }
-    //     }),
-    //     allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,
-    //     cachePolicy: cloudFront.CachePolicy.CACHING_DISABLED,
-    //     viewerProtocolPolicy: cloudFront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-    //   },
-    //   priceClass: cloudFront.PriceClass.PRICE_CLASS_200,  
-    // });
+    const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
+      comment: "CloudFront distribution for Streamlit frontend application",
+      defaultBehavior: {
+        origin: new origins.LoadBalancerV2Origin(alb, {
+          protocolPolicy: cloudFront.OriginProtocolPolicy.HTTP_ONLY,
+          httpPort: 80,
+          originPath: "/",
+        }),
+        allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,
+        cachePolicy: cloudFront.CachePolicy.CACHING_DISABLED,
+        viewerProtocolPolicy: cloudFront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      },
+      priceClass: cloudFront.PriceClass.PRICE_CLASS_200,  
+    });
 
-    // new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
-    //   value: 'https://'+distribution.domainName+'/',      
-    //   description: 'The web url of request for chat',
-    // });     
+    new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
+      value: 'https://'+distribution.domainName+'/',      
+      description: 'The web url of request for chat',
+    });     
   }
 }
     // const cloudfront_distribution = cloudFront.Distribution(this, "StreamLitCloudFrontDistribution",
