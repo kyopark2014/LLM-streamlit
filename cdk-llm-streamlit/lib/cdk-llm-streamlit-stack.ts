@@ -14,7 +14,7 @@ import { RedirectProtocol } from 'aws-cdk-lib/aws-s3';
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
 const accountId = process.env.CDK_DEFAULT_ACCOUNT;
-const targetPort = 8501;
+const targetPort = 80;
 
 export class CdkLlmStreamlitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
