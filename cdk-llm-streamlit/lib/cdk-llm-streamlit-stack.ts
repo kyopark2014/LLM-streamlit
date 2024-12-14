@@ -14,7 +14,7 @@ import { RedirectProtocol } from 'aws-cdk-lib/aws-s3';
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
 const accountId = process.env.CDK_DEFAULT_ACCOUNT;
-const targetPort = 8501;
+const targetPort = 80;
 
 export class CdkLlmStreamlitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -235,7 +235,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
       port: 80,      
       protocol: elbv2.ApplicationProtocol.HTTP,      
-      defaultAction: default_group
+      // defaultAction: default_group
     });
     
     // listener.addAction(`RedirectHttpListener-for-${projectName}`, {
@@ -266,10 +266,16 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     
     // elbv2.ListenerAction.redirect({ permanent: true, port: '443', protocol: 'HTTPS' })
           
+    // listener.addTargets(`WebEc2Target-for-${projectName}`, {
+    //   targets,
+    //   priority: 1,
+    //   conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
+    //   protocol: elbv2.ApplicationProtocol.HTTP,
+    //   port: targetPort
+    // })
+
     listener.addTargets(`WebEc2Target-for-${projectName}`, {
       targets,
-      priority: 1,
-      conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
       protocol: elbv2.ApplicationProtocol.HTTP,
       port: targetPort
     })
