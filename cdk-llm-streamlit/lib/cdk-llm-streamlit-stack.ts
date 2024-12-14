@@ -224,7 +224,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   contentType: 'text/plain'
     // })
 
-    const default_group =elbv2.ListenerAction.redirect({
+    const default_action =elbv2.ListenerAction.redirect({
       host: distribution.domainName, 
       path: "/", 
       permanent: true, 
@@ -238,11 +238,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       // defaultAction: default_group
     });
     
-    // listener.addAction(`RedirectHttpListener-for-${projectName}`, {
-    //   action: action,
-    //   conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
-    //   priority: 1,
-    // })
+    
     // listener.addAction('DefaultAction', {
     //   action: elbv2.ListenerAction.fixedResponse(404, {
     //     contentType: "text/html",
@@ -276,12 +272,15 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
 
     listener.addTargets(`WebEc2Target-for-${projectName}`, {
       targets,
-      priority: 1,
-      conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
-      protocol: elbv2.ApplicationProtocol.HTTP,      
+      protocol: elbv2.ApplicationProtocol.HTTP,
       port: targetPort
     })
 
+    listener.addAction(`RedirectHttpListener-for-${projectName}`, {
+      action: default_action,
+      conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
+      priority: 5,
+    });
 
 
     // new elbv2.ApplicationListenerRule(this, 'RedirectApplicationListenerRule', {
