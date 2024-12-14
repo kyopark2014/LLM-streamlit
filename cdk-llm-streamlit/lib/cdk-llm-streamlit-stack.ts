@@ -75,7 +75,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
         },
       ],
     }); 
-    vpc.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
+    // vpc.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
     // Ec2 Security Group
     const ec2Sg = new ec2.SecurityGroup(this, `ec2-sg-for-${projectName}`,
@@ -107,7 +107,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     ec2Sg.connections.allowFrom(albSg, ec2.Port.tcp(targetPort), 'allow traffic from alb') // alb -> ec2
     
     const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
-      // internetFacing: true,
+      internetFacing: true,
       vpc: vpc,
       vpcSubnets: {
         subnets: vpc.publicSubnets
@@ -116,6 +116,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       loadBalancerName: `alb-for-${projectName}`
     })
     alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
+
+
 
     // const userData = ec2.UserData.forLinux({
     //   shebang: '#!/usr/bash',
@@ -201,6 +203,12 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       priceClass: cloudFront.PriceClass.PRICE_CLASS_200,  
     });
 
+    new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
+      value: `http://${alb.loadBalancerDnsName}/`,
+      description: 'albUrl',
+      exportName: 'albUrl',
+    });  
+    
     new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
       value: 'https://'+distribution.domainName+'/',      
       description: 'The web url of request for chat',
