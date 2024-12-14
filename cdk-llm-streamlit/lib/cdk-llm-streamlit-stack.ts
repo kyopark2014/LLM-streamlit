@@ -98,7 +98,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // );
 
     // ALB    
-    /* const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
+    const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
       vpc: vpc,
       allowAllOutbound: true,
       securityGroupName: `alb-sg-for-${projectName}`,
@@ -115,7 +115,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       securityGroup: albSg,
       loadBalancerName: `alb-for-${projectName}`
     })
-    alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY); */
+    alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
 
 
@@ -177,7 +177,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     const targets: elbv2_tg.InstanceTarget[] = new Array();
     targets.push(new elbv2_tg.InstanceTarget(appInstance));
 
-    /*const listener = alb.addListener(`HttpListener-for-${projectName}`, {      
+    const listener = alb.addListener(`HttpListener-for-${projectName}`, {      
       port: 80,      
       protocol: elbv2.ApplicationProtocol.HTTP
     })
@@ -185,10 +185,10 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       targets,
       protocol: elbv2.ApplicationProtocol.HTTP,
       port: targetPort
-    })*/
+    })
 
     // cloudfront
-   /* const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
+    const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
       comment: "CloudFront distribution for Streamlit frontend application",
       defaultBehavior: {
         origin: new origins.LoadBalancerV2Origin(alb, {
@@ -212,7 +212,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
       value: 'https://'+distribution.domainName+'/',      
       description: 'The web url of request for chat',
-    });     */
+    });     
   }
 }
     // const cloudfront_distribution = cloudFront.Distribution(this, "StreamLitCloudFrontDistribution",
