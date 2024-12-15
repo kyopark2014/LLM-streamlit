@@ -101,32 +101,24 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // );
 
     // ALB    
-    // const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
-    //   vpc: vpc,
-    //   allowAllOutbound: true,
-    //   securityGroupName: `alb-sg-for-${projectName}`,
-    //   description: 'security group for alb'
-    // })
-    // ec2Sg.connections.allowFrom(albSg, ec2.Port.tcp(targetPort), 'allow traffic from alb') // alb -> ec2
+    const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
+      vpc: vpc,
+      allowAllOutbound: true,
+      securityGroupName: `alb-sg-for-${projectName}`,
+      description: 'security group for alb'
+    })
+    ec2Sg.connections.allowFrom(albSg, ec2.Port.tcp(targetPort), 'allow traffic from alb') // alb -> ec2
     
-    // const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
-    //   internetFacing: true,
-    //   vpc: vpc,
-    //   vpcSubnets: {
-    //     subnets: vpc.publicSubnets
-    //   },
-    //   securityGroup: albSg,
-    //   loadBalancerName: `alb-for-${projectName}`
-    // })
-    // alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
-
-
-    const nlb = new elbv2.NetworkLoadBalancer(this, `nlb-for-${projectName}`, {
-      vpc,
-      loadBalancerName: `nlb-for-${projectName}`
-    });
-
-
+    const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
+      internetFacing: true,
+      vpc: vpc,
+      vpcSubnets: {
+        subnets: vpc.publicSubnets
+      },
+      securityGroup: albSg,
+      loadBalancerName: `alb-for-${projectName}`
+    })
+    alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
 
 
@@ -195,11 +187,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
       comment: "CloudFront distribution for Streamlit frontend application",
       defaultBehavior: {
-        origin: new origins.LoadBalancerV2Origin(nlb, {
+        origin: new origins.LoadBalancerV2Origin(alb, {
           protocolPolicy: cloudFront.OriginProtocolPolicy.HTTP_ONLY,
           httpPort: 80,
           originPath: "/",
-          // customHeaders: { [custom_header_name] : custom_header_value }
+          customHeaders: { [custom_header_name] : custom_header_value }
         }),
         allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,
         cachePolicy: cloudFront.CachePolicy.CACHING_DISABLED,
@@ -240,23 +232,53 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   protocol: "HTTPS"
     // })
 
-    // const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
-    //   port: 80,      
-    //   protocol: elbv2.ApplicationProtocol.HTTP,      
-    //   // defaultAction: default_group
-    // });
-    
-    const listener = nlb.addListener(`listener-${projectName}`, { port: 80 });
-    listener.addTargets('target', {
-      targets,
-      port: 80,
+    const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
+      port: 80,      
+      protocol: elbv2.ApplicationProtocol.HTTP,      
+      // defaultAction: default_group
     });
+    
+    // listener.addAction(`RedirectHttpListener-for-${projectName}`, {
+    //   action: default_action,
+    //   conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
+    //   priority: 5,
+    // });
+    // listener.addAction('DefaultAction', {
+    //   action: elbv2.ListenerAction.fixedResponse(404, {
+    //     contentType: "text/html",
+    //     messageBody: 'Cannot route your request; no matching project found.',
+    //   }),
+    // });
 
+    // const demoTargetGroup = listener.addTargets("demoTargetGroup", {
+    //   port: 80,
+    //   priority: 10,
+    //   protocol: elbv2.ApplicationProtocol.HTTP,  
+    //   conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
+    //   targetGroupName: "demoTargetGroup",
+    //   healthCheck: {
+    //       path: "/content/de.html",
+    //   }
+    // });
+    // listener.addTargetGroups("demoTargetGroupInt", {
+    //     targetGroups: [demoTargetGroup]
+    // })
+    
+    // elbv2.ListenerAction.redirect({ permanent: true, port: '443', protocol: 'HTTPS' })
+          
     // listener.addTargets(`WebEc2Target-for-${projectName}`, {
     //   targets,
-    //   // protocol: elbv2.ApplicationProtocol.HTTP,
+    //   priority: 1,
+    //   conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
+    //   protocol: elbv2.ApplicationProtocol.HTTP,
     //   port: targetPort
     // })
+
+    listener.addTargets(`WebEc2Target-for-${projectName}`, {
+      targets,
+      protocol: elbv2.ApplicationProtocol.HTTP,
+      port: targetPort
+    })
 
 
 
@@ -269,14 +291,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   action: elbv2.ListenerAction.redirect()
     // });
 
-    // new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
-    //   value: `http://${alb.loadBalancerDnsName}/`,
-    //   description: 'albUrl',
-    //   exportName: 'albUrl',
-    // });  
-
     new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
-      value: `http://${nlb.loadBalancerDnsName}/`,
+      value: `http://${alb.loadBalancerDnsName}/`,
       description: 'albUrl',
       exportName: 'albUrl',
     });  
@@ -319,40 +335,3 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // const httpEndpoint = new apigatewayv2.HttpApi(this, 'HttpProxyPrivateApi', {
     //   defaultIntegration: new apigatewayv2_integrations.HttpNlbIntegration('DefaultIntegration', listener),
     // });
-
-
-        // listener.addAction(`RedirectHttpListener-for-${projectName}`, {
-    //   action: default_action,
-    //   conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
-    //   priority: 5,
-    // });
-    // listener.addAction('DefaultAction', {
-    //   action: elbv2.ListenerAction.fixedResponse(404, {
-    //     contentType: "text/html",
-    //     messageBody: 'Cannot route your request; no matching project found.',
-    //   }),
-    // });
-
-    // const demoTargetGroup = listener.addTargets("demoTargetGroup", {
-    //   port: 80,
-    //   priority: 10,
-    //   protocol: elbv2.ApplicationProtocol.HTTP,  
-    //   conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
-    //   targetGroupName: "demoTargetGroup",
-    //   healthCheck: {
-    //       path: "/content/de.html",
-    //   }
-    // });
-    // listener.addTargetGroups("demoTargetGroupInt", {
-    //     targetGroups: [demoTargetGroup]
-    // })
-    
-    // elbv2.ListenerAction.redirect({ permanent: true, port: '443', protocol: 'HTTPS' })
-          
-    // listener.addTargets(`WebEc2Target-for-${projectName}`, {
-    //   targets,
-    //   priority: 1,
-    //   conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
-    //   protocol: elbv2.ApplicationProtocol.HTTP,
-    //   port: targetPort
-    // })
