@@ -199,7 +199,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
           protocolPolicy: cloudFront.OriginProtocolPolicy.HTTP_ONLY,
           httpPort: 80,
           originPath: "/",
-          customHeaders: { [custom_header_name] : custom_header_value }
+          // customHeaders: { [custom_header_name] : custom_header_value }
         }),
         allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,
         cachePolicy: cloudFront.CachePolicy.CACHING_DISABLED,
@@ -252,11 +252,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       port: 80,
     });
 
-    listener.addTargets(`WebEc2Target-for-${projectName}`, {
-      targets,
-      // protocol: elbv2.ApplicationProtocol.HTTP,
-      port: targetPort
-    })
+    // listener.addTargets(`WebEc2Target-for-${projectName}`, {
+    //   targets,
+    //   // protocol: elbv2.ApplicationProtocol.HTTP,
+    //   port: targetPort
+    // })
 
 
 
