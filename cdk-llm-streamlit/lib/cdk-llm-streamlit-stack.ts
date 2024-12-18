@@ -211,19 +211,19 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
 
 /*    const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, alb.listeners[0], {
       vpcLink: vpcLink
-    }) */
+    }) 
 
     const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, {
       vpcLink: vpcLink
-    }) 
+    })  */
 
 
-    api.addRoutes({
+ /*   api.addRoutes({
       path: '/{proxy+}',
       methods: [apigwv2.HttpMethod.ANY],
       // integration: new HttpAlbIntegration(`albIntegration-for-${projectName}`, listener),
       integration: proxyIntegration
-    })
+    }) */
 
     
     
