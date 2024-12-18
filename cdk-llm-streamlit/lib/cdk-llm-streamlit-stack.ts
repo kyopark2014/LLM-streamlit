@@ -228,7 +228,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     
     
     // cloudfront
-    const custom_header_name = "X-Verify-Origin"
+ /*   const custom_header_name = "X-Verify-Origin"
     const custom_header_value = this.stackName+"_StreamLitCloudFrontDistribution"
 
     const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
@@ -245,7 +245,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
         viewerProtocolPolicy: cloudFront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
       priceClass: cloudFront.PriceClass.PRICE_CLASS_200,  
-    });
+    }); */
 
     // const autoScalingGroup = new autoscaling.AutoScalingGroup(this, 'AutoScalingGroup', {      
     //   autoScalingGroupName: `asg-for-${projectName}`,
@@ -344,10 +344,10 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       exportName: 'albUrl',
     });  */
     
-    new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
+ /*   new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
       value: 'https://'+distribution.domainName+'/',      
       description: 'The web url of request for chat',
-    });     
+    });     */
   }
 }
     // const cloudfront_distribution = cloudFront.Distribution(this, "StreamLitCloudFrontDistribution",
