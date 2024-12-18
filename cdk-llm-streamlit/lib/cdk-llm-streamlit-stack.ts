@@ -101,7 +101,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // );
 
     // ALB    
-    const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
+ /*   const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
       vpc: vpc,
       allowAllOutbound: true,
       securityGroupName: `alb-sg-for-${projectName}`,
@@ -118,7 +118,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       securityGroup: albSg,
       loadBalancerName: `alb-for-${projectName}`
     })
-    alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
+    alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY); */
 
 
 
@@ -177,8 +177,49 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     }); 
     appInstance.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
-    const targets: elbv2_tg.InstanceTarget[] = new Array();
-    targets.push(new elbv2_tg.InstanceTarget(appInstance));
+/*    const targets: elbv2_tg.InstanceTarget[] = new Array();
+    targets.push(new elbv2_tg.InstanceTarget(appInstance)); */
+
+    // VPC Link Security Group    
+    const vpcLinkSg = new ec2.SecurityGroup(this, `vpclink-sg-for-${projectName}`, {
+      vpc,      
+      allowAllOutbound: true,
+      securityGroupName: `vpclink-sg-for-${projectName}`,
+      description: 'security group for vpclink'
+    })
+
+    const api = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
+      description: 'API Gateway for streamlit',
+      apiName: `api-for-${projectName}`,      
+      createDefaultStage: true,
+    });
+
+    new cdk.CfnOutput(this, `apigwUrl-for-${projectName}`, {
+      value: `${api.url}`,
+      description: 'api gateway Url',
+      exportName: 'apigwUrl',
+    });   
+
+    const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
+      vpc,
+      // subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
+      subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS}),
+      securityGroups: [vpcLinkSg],
+      vpcLinkName: `VpcLink-for-${projectName}`,
+    });
+
+    const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, alb.listeners[0], {
+      vpcLink: vpcLink
+    })
+
+    api.addRoutes({
+      path: '/{proxy+}',
+      methods: [apigwv2.HttpMethod.ANY],
+      // integration: new HttpAlbIntegration(`albIntegration-for-${projectName}`, listener),
+      integration: proxyIntegration
+    })
+
+    
     
     // cloudfront
     const custom_header_name = "X-Verify-Origin"
@@ -232,11 +273,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   protocol: "HTTPS"
     // })
 
-    const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
+ /*   const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
       port: 80,      
       protocol: elbv2.ApplicationProtocol.HTTP,      
       // defaultAction: default_group
-    });
+    }); */
     
     // listener.addAction(`RedirectHttpListener-for-${projectName}`, {
     //   action: default_action,
@@ -274,11 +315,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   port: targetPort
     // })
 
-    listener.addTargets(`WebEc2Target-for-${projectName}`, {
+ /*   listener.addTargets(`WebEc2Target-for-${projectName}`, {
       targets,
       protocol: elbv2.ApplicationProtocol.HTTP,
       port: targetPort
-    })
+    }) */
 
 
 
@@ -291,11 +332,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   action: elbv2.ListenerAction.redirect()
     // });
 
-    new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
+  /*  new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
       value: `http://${alb.loadBalancerDnsName}/`,
       description: 'albUrl',
       exportName: 'albUrl',
-    });  
+    });  */
     
     new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
       value: 'https://'+distribution.domainName+'/',      
