@@ -10,6 +10,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as autoscaling from 'aws-cdk-lib/aws-autoscaling'
 import { RedirectProtocol } from 'aws-cdk-lib/aws-s3';
+import * as apigwv2 from 'aws-cdk-lib/aws-apigatewayv2';
 
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
