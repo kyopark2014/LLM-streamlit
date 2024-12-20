@@ -209,13 +209,13 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY); 
 
     // VPC Link
-    const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
+  /*  const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
       vpc,
       // subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
       subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS}),
       securityGroups: [vpcLinkSg],
       vpcLinkName: `VpcLink-for-${projectName}`,
-    });
+    });*/
 
     // API GW - VPC Link
   /*  const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
@@ -224,16 +224,16 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       // defaultAction: default_group
     }); */
 
-    const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, alb.listeners[0], {
+  /*  const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, alb.listeners[0], {
       vpcLink: vpcLink
-    }) 
+    }) */
 
-    api.addRoutes({
+  /*  api.addRoutes({
       path: '/{proxy+}',
       methods: [apigwv2.HttpMethod.ANY],
       // integration: new HttpAlbIntegration(`albIntegration-for-${projectName}`, listener),
       integration: proxyIntegration
-    }) 
+    }) */
   
   /*  listener.addTargets(`WebEc2Target-for-${projectName}`, {
       targets,
