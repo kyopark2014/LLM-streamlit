@@ -197,7 +197,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     ec2Sg.connections.allowFrom(albSg, ec2.Port.tcp(targetPort), 'allow traffic from alb') // alb -> ec2
     
     const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
-      internetFacing: true,
+      // internetFacing: true,
       vpc: vpc,
       vpcSubnets: {
         // subnets: vpc.publicSubnets
@@ -218,11 +218,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     });*/
 
     // API GW - VPC Link
-  /*  const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
+    const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
       port: 80,
       protocol: elbv2.ApplicationProtocol.HTTP,      
       // defaultAction: default_group
-    }); */
+    }); 
 
   /*  const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, alb.listeners[0], {
       vpcLink: vpcLink
@@ -235,11 +235,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       integration: proxyIntegration
     }) */
   
-  /*  listener.addTargets(`WebEc2Target-for-${projectName}`, {
+    listener.addTargets(`WebEc2Target-for-${projectName}`, {
       targets,
       protocol: elbv2.ApplicationProtocol.HTTP,
       port: targetPort
-    })  */
+    })  
 
     // new elbv2.ApplicationListenerRule(this, 'RedirectApplicationListenerRule', {
     //   listener: listener,
