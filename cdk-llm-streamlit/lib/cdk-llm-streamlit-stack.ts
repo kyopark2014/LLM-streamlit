@@ -212,15 +212,21 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     });
 
     // API GW - VPC Link
-    const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, alb.listeners[0], {
-      vpcLink: vpcLink
-    }) 
+    const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
+      port: 80,
+      protocol: elbv2.ApplicationProtocol.HTTP,      
+      // defaultAction: default_group
+    });
+
+    // const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, alb.listeners[0], {
+    //   vpcLink: vpcLink
+    // }) 
 
     api.addRoutes({
       path: '/{proxy+}',
       methods: [apigwv2.HttpMethod.ANY],
-      // integration: new HttpAlbIntegration(`albIntegration-for-${projectName}`, listener),
-      integration: proxyIntegration
+      integration: new HttpAlbIntegration(`albIntegration-for-${projectName}`, listener),
+      // integration: proxyIntegration
     }) 
     
     // cloudfront
@@ -275,11 +281,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   protocol: "HTTPS"
     // })
 
-    const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
-      port: 80,
-      protocol: elbv2.ApplicationProtocol.HTTP,      
-      // defaultAction: default_group
-    }); 
+     
     
     // listener.addAction(`RedirectHttpListener-for-${projectName}`, {
     //   action: default_action,
