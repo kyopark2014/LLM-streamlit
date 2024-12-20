@@ -16,7 +16,7 @@ import { HttpAlbIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
 const accountId = process.env.CDK_DEFAULT_ACCOUNT;
-const targetPort = 80;
+const targetPort = 8501;
 
 export class CdkLlmStreamlitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -224,6 +224,12 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       // defaultAction: default_group
     }); 
 
+    listener.addTargets(`WebEc2Target-for-${projectName}`, {
+      targets,
+      protocol: elbv2.ApplicationProtocol.HTTP,
+      port: targetPort
+    })  
+
     const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, alb.listeners[0], {
       vpcLink: vpcLink
     }) 
@@ -234,12 +240,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       // integration: new HttpAlbIntegration(`albIntegration-for-${projectName}`, listener),
       integration: proxyIntegration
     }) 
-  
-    listener.addTargets(`WebEc2Target-for-${projectName}`, {
-      targets,
-      protocol: elbv2.ApplicationProtocol.HTTP,
-      port: targetPort
-    })  
 
     new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
       value: `http://${alb.loadBalancerDnsName}/`,
