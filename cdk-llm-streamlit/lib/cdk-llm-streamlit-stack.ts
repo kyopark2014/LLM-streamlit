@@ -162,7 +162,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     targets.push(new elbv2_tg.InstanceTarget(appInstance)); 
 
     // VPC Link Security Group    
- /*   const vpcLinkSg = new ec2.SecurityGroup(this, `vpclink-sg-for-${projectName}`, {
+    const vpcLinkSg = new ec2.SecurityGroup(this, `vpclink-sg-for-${projectName}`, {
       vpc,      
       allowAllOutbound: true,
       securityGroupName: `vpclink-sg-for-${projectName}`,
@@ -200,7 +200,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       internetFacing: true,
       vpc: vpc,
       vpcSubnets: {
-        subnets: vpc.publicSubnets
+        // subnets: vpc.publicSubnets
+        subnets: vpc.privateSubnets
       },
       securityGroup: albSg,
       loadBalancerName: `alb-for-${projectName}`
@@ -210,35 +211,35 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // VPC Link
     const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
       vpc,
-      subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
-      // subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS}),
+      // subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
+      subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS}),
       securityGroups: [vpcLinkSg],
       vpcLinkName: `VpcLink-for-${projectName}`,
     });
 
     // API GW - VPC Link
-    const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
+  /*  const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
       port: 80,
       protocol: elbv2.ApplicationProtocol.HTTP,      
       // defaultAction: default_group
-    });
+    }); */
 
-    // const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, alb.listeners[0], {
-    //   vpcLink: vpcLink
-    // }) 
+    const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, alb.listeners[0], {
+      vpcLink: vpcLink
+    }) 
 
     api.addRoutes({
       path: '/{proxy+}',
       methods: [apigwv2.HttpMethod.ANY],
-      integration: new HttpAlbIntegration(`albIntegration-for-${projectName}`, listener),
-      // integration: proxyIntegration
+      // integration: new HttpAlbIntegration(`albIntegration-for-${projectName}`, listener),
+      integration: proxyIntegration
     }) 
   
-    listener.addTargets(`WebEc2Target-for-${projectName}`, {
+  /*  listener.addTargets(`WebEc2Target-for-${projectName}`, {
       targets,
       protocol: elbv2.ApplicationProtocol.HTTP,
       port: targetPort
-    }) */
+    })  */
 
     // new elbv2.ApplicationListenerRule(this, 'RedirectApplicationListenerRule', {
     //   listener: listener,
@@ -249,11 +250,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   action: elbv2.ListenerAction.redirect()
     // });
 
-/*    new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
+    new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
       value: `http://${alb.loadBalancerDnsName}/`,
       description: 'albUrl',
       exportName: 'albUrl',
-    });      */
+    });      
   }
 }
     // const cloudfront_distribution = cloudFront.Distribution(this, "StreamLitCloudFrontDistribution",
