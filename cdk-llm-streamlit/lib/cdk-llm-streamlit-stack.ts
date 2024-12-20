@@ -162,17 +162,17 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     targets.push(new elbv2_tg.InstanceTarget(appInstance)); 
 
     // VPC Link Security Group    
-    const vpcLinkSg = new ec2.SecurityGroup(this, `vpclink-sg-for-${projectName}`, {
+ /*   const vpcLinkSg = new ec2.SecurityGroup(this, `vpclink-sg-for-${projectName}`, {
       vpc,      
       allowAllOutbound: true,
       securityGroupName: `vpclink-sg-for-${projectName}`,
       description: 'security group for vpclink'
     })
-    // vpcLinkSg.addIngressRule(
-    //   ec2.Peer.anyIpv4(),
-    //   ec2.Port.tcp(80),
-    //   'HTTP',
-    // );
+    vpcLinkSg.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(80),
+      'HTTP',
+    );
 
     // API Gateway
     const api = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
@@ -233,84 +233,12 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       integration: new HttpAlbIntegration(`albIntegration-for-${projectName}`, listener),
       // integration: proxyIntegration
     }) 
-    
-
-
-    // const autoScalingGroup = new autoscaling.AutoScalingGroup(this, 'AutoScalingGroup', {      
-    //   autoScalingGroupName: `asg-for-${projectName}`,
-    //   instanceType: new ec2.InstanceType('t2.small'),
-    //   machineImage: new ec2.AmazonLinuxImage({
-    //     generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2023
-    //   }), 
-    //   vpc: vpc, 
-    //   vpcSubnets: {
-    //     subnets: vpc.publicSubnets  
-    //   },
-    //   securityGroup: ec2Sg,
-    //   role: ec2Role,
-    //   allowAllOutbound: true,
-    //   minCapacity: 1,
-    //   maxCapacity: 1,
-    //   desiredCapacity: 1,
-    //   healthCheck: autoscaling.HealthCheck.ec2()
-    // });
-
-    // const my_target_group = elbv2.ListenerAction.fixedResponse(200, {
-    //   messageBody: 'OK',
-    //   contentType: 'text/plain'
-    // })
-
-    // const default_action =elbv2.ListenerAction.redirect({
-    //   host: distribution.domainName, 
-    //   path: "/", 
-    //   permanent: true, 
-    //   port: "443", 
-    //   protocol: "HTTPS"
-    // })
-
-     
-    
-    // listener.addAction(`RedirectHttpListener-for-${projectName}`, {
-    //   action: default_action,
-    //   conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
-    //   priority: 5,
-    // });
-    // listener.addAction('DefaultAction', {
-    //   action: elbv2.ListenerAction.fixedResponse(404, {
-    //     contentType: "text/html",
-    //     messageBody: 'Cannot route your request; no matching project found.',
-    //   }),
-    // });
-
-    // const demoTargetGroup = listener.addTargets("demoTargetGroup", {
-    //   port: 80,
-    //   priority: 10,
-    //   protocol: elbv2.ApplicationProtocol.HTTP,  
-    //   conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
-    //   targetGroupName: "demoTargetGroup",
-    //   healthCheck: {
-    //       path: "/content/de.html",
-    //   }
-    // });
-    // listener.addTargetGroups("demoTargetGroupInt", {
-    //     targetGroups: [demoTargetGroup]
-    // })
-    
-    // elbv2.ListenerAction.redirect({ permanent: true, port: '443', protocol: 'HTTPS' })
-          
-    // listener.addTargets(`WebEc2Target-for-${projectName}`, {
-    //   targets,
-    //   priority: 1,
-    //   conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
-    //   protocol: elbv2.ApplicationProtocol.HTTP,
-    //   port: targetPort
-    // })
-
+  
     listener.addTargets(`WebEc2Target-for-${projectName}`, {
       targets,
       protocol: elbv2.ApplicationProtocol.HTTP,
       port: targetPort
-    }) 
+    }) */
 
     // new elbv2.ApplicationListenerRule(this, 'RedirectApplicationListenerRule', {
     //   listener: listener,
@@ -386,3 +314,74 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       value: 'https://'+distribution.domainName+'/',      
       description: 'The web url of request for chat',
     });     */
+
+
+        // const autoScalingGroup = new autoscaling.AutoScalingGroup(this, 'AutoScalingGroup', {      
+    //   autoScalingGroupName: `asg-for-${projectName}`,
+    //   instanceType: new ec2.InstanceType('t2.small'),
+    //   machineImage: new ec2.AmazonLinuxImage({
+    //     generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2023
+    //   }), 
+    //   vpc: vpc, 
+    //   vpcSubnets: {
+    //     subnets: vpc.publicSubnets  
+    //   },
+    //   securityGroup: ec2Sg,
+    //   role: ec2Role,
+    //   allowAllOutbound: true,
+    //   minCapacity: 1,
+    //   maxCapacity: 1,
+    //   desiredCapacity: 1,
+    //   healthCheck: autoscaling.HealthCheck.ec2()
+    // });
+
+    // const my_target_group = elbv2.ListenerAction.fixedResponse(200, {
+    //   messageBody: 'OK',
+    //   contentType: 'text/plain'
+    // })
+
+    // const default_action =elbv2.ListenerAction.redirect({
+    //   host: distribution.domainName, 
+    //   path: "/", 
+    //   permanent: true, 
+    //   port: "443", 
+    //   protocol: "HTTPS"
+    // })
+
+     
+    
+    // listener.addAction(`RedirectHttpListener-for-${projectName}`, {
+    //   action: default_action,
+    //   conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
+    //   priority: 5,
+    // });
+    // listener.addAction('DefaultAction', {
+    //   action: elbv2.ListenerAction.fixedResponse(404, {
+    //     contentType: "text/html",
+    //     messageBody: 'Cannot route your request; no matching project found.',
+    //   }),
+    // });
+
+    // const demoTargetGroup = listener.addTargets("demoTargetGroup", {
+    //   port: 80,
+    //   priority: 10,
+    //   protocol: elbv2.ApplicationProtocol.HTTP,  
+    //   conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
+    //   targetGroupName: "demoTargetGroup",
+    //   healthCheck: {
+    //       path: "/content/de.html",
+    //   }
+    // });
+    // listener.addTargetGroups("demoTargetGroupInt", {
+    //     targetGroups: [demoTargetGroup]
+    // })
+    
+    // elbv2.ListenerAction.redirect({ permanent: true, port: '443', protocol: 'HTTPS' })
+          
+    // listener.addTargets(`WebEc2Target-for-${projectName}`, {
+    //   targets,
+    //   priority: 1,
+    //   conditions: [elbv2.ListenerCondition.httpHeader(custom_header_name, [custom_header_value])],
+    //   protocol: elbv2.ApplicationProtocol.HTTP,
+    //   port: targetPort
+    // })
