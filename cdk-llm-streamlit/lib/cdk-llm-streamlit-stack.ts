@@ -205,8 +205,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // VPC Link
     const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
       vpc,
-      // subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
-      subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS}),
+      subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
+      // subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS}),
       securityGroups: [vpcLinkSg],
       vpcLinkName: `VpcLink-for-${projectName}`,
     });
