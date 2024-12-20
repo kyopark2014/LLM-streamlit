@@ -203,7 +203,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY); 
 
     // VPC Link
-  /*  const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
+    const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
       vpc,
       // subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
       subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS}),
@@ -221,7 +221,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       methods: [apigwv2.HttpMethod.ANY],
       // integration: new HttpAlbIntegration(`albIntegration-for-${projectName}`, listener),
       integration: proxyIntegration
-    }) */
+    }) 
     
     // cloudfront
  /*   const custom_header_name = "X-Verify-Origin"
