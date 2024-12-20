@@ -16,7 +16,7 @@ import { HttpAlbIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
 const accountId = process.env.CDK_DEFAULT_ACCOUNT;
-const targetPort = 80;
+const targetPort = 8501;
 
 export class CdkLlmStreamlitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -168,6 +168,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       securityGroupName: `vpclink-sg-for-${projectName}`,
       description: 'security group for vpclink'
     })
+    // vpcLinkSg.addIngressRule(
+    //   ec2.Peer.anyIpv4(),
+    //   ec2.Port.tcp(80),
+    //   'HTTP',
+    // );
 
     // API Gateway
     const api = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
