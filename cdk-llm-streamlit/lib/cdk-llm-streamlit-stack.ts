@@ -16,7 +16,7 @@ import { HttpAlbIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
 const accountId = process.env.CDK_DEFAULT_ACCOUNT;
-const targetPort = 80;
+const targetPort = 8501;
 
 export class CdkLlmStreamlitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
