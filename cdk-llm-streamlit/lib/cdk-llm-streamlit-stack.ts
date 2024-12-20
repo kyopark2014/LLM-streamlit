@@ -102,7 +102,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   'HTTP',
     // );
 
-
     // const userData = ec2.UserData.forLinux({
     //   shebang: '#!/usr/bash',
     // })
@@ -134,7 +133,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
       instanceName: `app-for-${projectName}`,
       instanceType: new ec2.InstanceType('t2.small'), // m5.large
-      // instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.SMALL),      
+      // instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.SMALL),
       machineImage: new ec2.AmazonLinuxImage({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2023
       }),
@@ -158,36 +157,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     }); 
     appInstance.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
+    // ALB Target
     const targets: elbv2_tg.InstanceTarget[] = new Array();
     targets.push(new elbv2_tg.InstanceTarget(appInstance)); 
 
-    // VPC Link Security Group    
-    const vpcLinkSg = new ec2.SecurityGroup(this, `vpclink-sg-for-${projectName}`, {
-      vpc,      
-      allowAllOutbound: true,
-      securityGroupName: `vpclink-sg-for-${projectName}`,
-      description: 'security group for vpclink'
-    })
-    vpcLinkSg.addIngressRule(
-      ec2.Peer.anyIpv4(),
-      ec2.Port.tcp(80),
-      'HTTP',
-    );
-
-    // API Gateway
-    const api = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
-      description: 'API Gateway for streamlit',
-      apiName: `api-for-${projectName}`,      
-      createDefaultStage: true,
-    });
-
-    new cdk.CfnOutput(this, `apigwUrl-for-${projectName}`, {
-      value: `${api.url}`,
-      description: 'api gateway Url',
-      exportName: 'apigwUrl',
-    });   
-
-    // ALB    
+    // ALB SG
     const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
       vpc: vpc,
       allowAllOutbound: true,
@@ -196,28 +170,19 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     })
     ec2Sg.connections.allowFrom(albSg, ec2.Port.tcp(targetPort), 'allow traffic from alb') // alb -> ec2
     
+    // ALB
     const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
-      // internetFacing: true,
+      internetFacing: true,
       vpc: vpc,
       vpcSubnets: {
-        // subnets: vpc.publicSubnets
-        subnets: vpc.privateSubnets
+        subnets: vpc.publicSubnets
       },
       securityGroup: albSg,
       loadBalancerName: `alb-for-${projectName}`
     })
     alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY); 
 
-    // VPC Link
-    const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
-      vpc,
-      // subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
-      subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS}),
-      securityGroups: [vpcLinkSg],
-      vpcLinkName: `VpcLink-for-${projectName}`,
-    });
-
-    // API GW - VPC Link
+    // ALB Listener
     const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
       port: 80,
       protocol: elbv2.ApplicationProtocol.HTTP,      
@@ -229,17 +194,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       protocol: elbv2.ApplicationProtocol.HTTP,
       port: targetPort
     })  
-
-    const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, alb.listeners[0], {
-      vpcLink: vpcLink
-    }) 
-
-    api.addRoutes({
-      path: '/{proxy+}',
-      methods: [apigwv2.HttpMethod.ANY],
-      // integration: new HttpAlbIntegration(`albIntegration-for-${projectName}`, listener),
-      integration: proxyIntegration
-    }) 
 
     new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
       value: `http://${alb.loadBalancerDnsName}/`,
@@ -385,3 +339,51 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   conditions: [elbv2.ListenerCondition.pathPatterns(["*"])],
     //   action: elbv2.ListenerAction.redirect()
     // });
+
+
+    // API Gateway
+    // const api = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
+    //   description: 'API Gateway for streamlit',
+    //   apiName: `api-for-${projectName}`,      
+    //   createDefaultStage: true,
+    // });
+
+    // new cdk.CfnOutput(this, `apigwUrl-for-${projectName}`, {
+    //   value: `${api.url}`,
+    //   description: 'api gateway Url',
+    //   exportName: 'apigwUrl',
+    // });   
+
+
+    // // VPC Link Security Group    
+    // const vpcLinkSg = new ec2.SecurityGroup(this, `vpclink-sg-for-${projectName}`, {
+    //   vpc,      
+    //   allowAllOutbound: true,
+    //   securityGroupName: `vpclink-sg-for-${projectName}`,
+    //   description: 'security group for vpclink'
+    // })
+    // vpcLinkSg.addIngressRule(
+    //   ec2.Peer.anyIpv4(),
+    //   ec2.Port.tcp(80),
+    //   'HTTP',
+    // );
+
+    // const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, alb.listeners[0], {
+    //   vpcLink: vpcLink
+    // }) 
+
+    // api.addRoutes({
+    //   path: '/{proxy+}',
+    //   methods: [apigwv2.HttpMethod.ANY],
+    //   // integration: new HttpAlbIntegration(`albIntegration-for-${projectName}`, listener),
+    //   integration: proxyIntegration
+    // }) 
+
+    // // VPC Link
+    // const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
+    //   vpc,
+    //   // subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
+    //   subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS}),
+    //   securityGroups: [vpcLinkSg],
+    //   vpcLinkName: `VpcLink-for-${projectName}`,
+    // });    
