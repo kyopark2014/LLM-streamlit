@@ -16,7 +16,7 @@ import { HttpAlbIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
 const accountId = process.env.CDK_DEFAULT_ACCOUNT;
-const targetPort = 8501;
+const targetPort = 80;
 
 export class CdkLlmStreamlitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -229,25 +229,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       // integration: proxyIntegration
     }) 
     
-    // cloudfront
-    const custom_header_name = "X-Verify-Origin"
-    const custom_header_value = this.stackName+"_StreamLitCloudFrontDistribution"
 
-    const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
-      comment: "CloudFront distribution for Streamlit frontend application",
-      defaultBehavior: {
-        origin: new origins.LoadBalancerV2Origin(alb, {
-          protocolPolicy: cloudFront.OriginProtocolPolicy.HTTP_ONLY,
-          httpPort: 80,
-          originPath: "/",
-          // customHeaders: { [custom_header_name] : custom_header_value }
-        }),
-        allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,
-        cachePolicy: cloudFront.CachePolicy.CACHING_DISABLED,
-        viewerProtocolPolicy: cloudFront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-      },
-      priceClass: cloudFront.PriceClass.PRICE_CLASS_200,  
-    }); 
 
     // const autoScalingGroup = new autoscaling.AutoScalingGroup(this, 'AutoScalingGroup', {      
     //   autoScalingGroupName: `asg-for-${projectName}`,
@@ -325,8 +307,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       port: targetPort
     }) 
 
-
-
     // new elbv2.ApplicationListenerRule(this, 'RedirectApplicationListenerRule', {
     //   listener: listener,
     //   priority: 5,
@@ -340,12 +320,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       value: `http://${alb.loadBalancerDnsName}/`,
       description: 'albUrl',
       exportName: 'albUrl',
-    });  
-    
-    new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
-      value: 'https://'+distribution.domainName+'/',      
-      description: 'The web url of request for chat',
-    });     
+    });      
   }
 }
     // const cloudfront_distribution = cloudFront.Distribution(this, "StreamLitCloudFrontDistribution",
@@ -380,3 +355,29 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // const httpEndpoint = new apigatewayv2.HttpApi(this, 'HttpProxyPrivateApi', {
     //   defaultIntegration: new apigatewayv2_integrations.HttpNlbIntegration('DefaultIntegration', listener),
     // });
+
+
+    // // cloudfront
+    // const custom_header_name = "X-Verify-Origin"
+    // const custom_header_value = this.stackName+"_StreamLitCloudFrontDistribution"
+
+    // const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
+    //   comment: "CloudFront distribution for Streamlit frontend application",
+    //   defaultBehavior: {
+    //     origin: new origins.LoadBalancerV2Origin(alb, {
+    //       protocolPolicy: cloudFront.OriginProtocolPolicy.HTTP_ONLY,
+    //       httpPort: 80,
+    //       originPath: "/",
+    //       customHeaders: { [custom_header_name] : custom_header_value }
+    //     }),
+    //     allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,
+    //     cachePolicy: cloudFront.CachePolicy.CACHING_DISABLED,
+    //     viewerProtocolPolicy: cloudFront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+    //   },
+    //   priceClass: cloudFront.PriceClass.PRICE_CLASS_200,  
+    // }); 
+
+     /*   new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
+      value: 'https://'+distribution.domainName+'/',      
+      description: 'The web url of request for chat',
+    });     */
