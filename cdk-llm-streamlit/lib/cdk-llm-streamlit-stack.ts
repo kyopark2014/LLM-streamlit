@@ -158,7 +158,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     appInstance.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
     // ALB Target
-    const targets: elbv2_tg.InstanceTarget[] = new Array();
+  /*  const targets: elbv2_tg.InstanceTarget[] = new Array();
     targets.push(new elbv2_tg.InstanceTarget(appInstance)); 
 
     // ALB SG
@@ -199,7 +199,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       value: `http://${alb.loadBalancerDnsName}/`,
       description: 'albUrl',
       exportName: 'albUrl',
-    });      
+    });      */
   }
 }
     // const cloudfront_distribution = cloudFront.Distribution(this, "StreamLitCloudFrontDistribution",
