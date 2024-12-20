@@ -342,10 +342,10 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       exportName: 'albUrl',
     });  
     
- /*   new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
+    new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
       value: 'https://'+distribution.domainName+'/',      
       description: 'The web url of request for chat',
-    });     */
+    });     
   }
 }
     // const cloudfront_distribution = cloudFront.Distribution(this, "StreamLitCloudFrontDistribution",
