@@ -91,11 +91,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
         securityGroupName: `ec2-sg-for-${projectName}`,
       }
     );
-    ec2Sg.addIngressRule(
-      ec2.Peer.anyIpv4(),
-      ec2.Port.tcp(22),
-      'SSH',
-    );
+    // ec2Sg.addIngressRule(
+    //   ec2.Peer.anyIpv4(),
+    //   ec2.Port.tcp(22),
+    //   'SSH',
+    // );
     // ec2Sg.addIngressRule(
     //   ec2.Peer.anyIpv4(),
     //   ec2.Port.tcp(80),
@@ -230,7 +230,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     }) 
     
     // cloudfront
- /*   const custom_header_name = "X-Verify-Origin"
+    const custom_header_name = "X-Verify-Origin"
     const custom_header_value = this.stackName+"_StreamLitCloudFrontDistribution"
 
     const distribution = new cloudFront.Distribution(this, `cloudfront-for-${projectName}`, {
@@ -240,14 +240,14 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
           protocolPolicy: cloudFront.OriginProtocolPolicy.HTTP_ONLY,
           httpPort: 80,
           originPath: "/",
-          customHeaders: { [custom_header_name] : custom_header_value }
+          // customHeaders: { [custom_header_name] : custom_header_value }
         }),
         allowedMethods: cloudFront.AllowedMethods.ALLOW_ALL,
         cachePolicy: cloudFront.CachePolicy.CACHING_DISABLED,
         viewerProtocolPolicy: cloudFront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
       priceClass: cloudFront.PriceClass.PRICE_CLASS_200,  
-    }); */
+    }); 
 
     // const autoScalingGroup = new autoscaling.AutoScalingGroup(this, 'AutoScalingGroup', {      
     //   autoScalingGroupName: `asg-for-${projectName}`,
