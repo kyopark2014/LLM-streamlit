@@ -175,7 +175,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     );
 
     // API Gateway
-  /*  const api = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
+    const api = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
       description: 'API Gateway for streamlit',
       apiName: `api-for-${projectName}`,      
       createDefaultStage: true,
@@ -245,7 +245,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       value: `http://${alb.loadBalancerDnsName}/`,
       description: 'albUrl',
       exportName: 'albUrl',
-    });     */ 
+    });      
   }
 }
     // const cloudfront_distribution = cloudFront.Distribution(this, "StreamLitCloudFrontDistribution",
