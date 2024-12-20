@@ -249,11 +249,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   action: elbv2.ListenerAction.redirect()
     // });
 
-    new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
+/*    new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
       value: `http://${alb.loadBalancerDnsName}/`,
       description: 'albUrl',
       exportName: 'albUrl',
-    });      
+    });      */
   }
 }
     // const cloudfront_distribution = cloudFront.Distribution(this, "StreamLitCloudFrontDistribution",
