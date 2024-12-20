@@ -11,6 +11,7 @@ import * as path from 'path';
 import * as autoscaling from 'aws-cdk-lib/aws-autoscaling'
 import { RedirectProtocol } from 'aws-cdk-lib/aws-s3';
 import * as apigwv2 from 'aws-cdk-lib/aws-apigatewayv2';
+import { HttpAlbIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
@@ -101,27 +102,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   'HTTP',
     // );
 
-    // ALB    
- /*   const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
-      vpc: vpc,
-      allowAllOutbound: true,
-      securityGroupName: `alb-sg-for-${projectName}`,
-      description: 'security group for alb'
-    })
-    ec2Sg.connections.allowFrom(albSg, ec2.Port.tcp(targetPort), 'allow traffic from alb') // alb -> ec2
-    
-    const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
-      internetFacing: true,
-      vpc: vpc,
-      vpcSubnets: {
-        subnets: vpc.publicSubnets
-      },
-      securityGroup: albSg,
-      loadBalancerName: `alb-for-${projectName}`
-    })
-    alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY); */
-
-
 
     // const userData = ec2.UserData.forLinux({
     //   shebang: '#!/usr/bash',
@@ -161,7 +141,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       // machineImage: ec2.MachineImage.latestAmazonLinux2023(),
       vpc: vpc,
       vpcSubnets: {
-        subnets: vpc.publicSubnets  // vpc.privateSubnets
+        subnets: vpc.privateSubnets  
       },
       securityGroup: ec2Sg,
       role: ec2Role,
@@ -178,8 +158,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     }); 
     appInstance.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
-/*    const targets: elbv2_tg.InstanceTarget[] = new Array();
-    targets.push(new elbv2_tg.InstanceTarget(appInstance)); */
+    const targets: elbv2_tg.InstanceTarget[] = new Array();
+    targets.push(new elbv2_tg.InstanceTarget(appInstance)); 
 
     // VPC Link Security Group    
     const vpcLinkSg = new ec2.SecurityGroup(this, `vpclink-sg-for-${projectName}`, {
@@ -189,6 +169,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       description: 'security group for vpclink'
     })
 
+    // API Gateway
     const api = new apigwv2.HttpApi(this, `api-for-${projectName}`, {
       description: 'API Gateway for streamlit',
       apiName: `api-for-${projectName}`,      
@@ -201,6 +182,27 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       exportName: 'apigwUrl',
     });   
 
+    // ALB    
+    const albSg = new ec2.SecurityGroup(this, `alb-sg-for-${projectName}`, {
+      vpc: vpc,
+      allowAllOutbound: true,
+      securityGroupName: `alb-sg-for-${projectName}`,
+      description: 'security group for alb'
+    })
+    ec2Sg.connections.allowFrom(albSg, ec2.Port.tcp(targetPort), 'allow traffic from alb') // alb -> ec2
+    
+    const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
+      internetFacing: true,
+      vpc: vpc,
+      vpcSubnets: {
+        subnets: vpc.privateSubnets
+      },
+      securityGroup: albSg,
+      loadBalancerName: `alb-for-${projectName}`
+    })
+    alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY); 
+
+    // VPC Link
     const vpcLink = new apigwv2.VpcLink(this, `VpcLink-for-${projectName}`, { 
       vpc,
       // subnets: vpc.selectSubnets({subnetType: ec2.SubnetType.PUBLIC}),
@@ -209,23 +211,17 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       vpcLinkName: `VpcLink-for-${projectName}`,
     });
 
-/*    const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, alb.listeners[0], {
+    // API GW - VPC Link
+    const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, alb.listeners[0], {
       vpcLink: vpcLink
     }) 
 
-    const proxyIntegration = new HttpAlbIntegration(`integration-for-${projectName}`, {
-      vpcLink: vpcLink
-    })  */
-
-
- /*   api.addRoutes({
+    api.addRoutes({
       path: '/{proxy+}',
       methods: [apigwv2.HttpMethod.ANY],
       // integration: new HttpAlbIntegration(`albIntegration-for-${projectName}`, listener),
       integration: proxyIntegration
-    }) */
-
-    
+    }) 
     
     // cloudfront
  /*   const custom_header_name = "X-Verify-Origin"
@@ -279,11 +275,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   protocol: "HTTPS"
     // })
 
- /*   const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
-      port: 80,      
+    const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
+      port: 80,
       protocol: elbv2.ApplicationProtocol.HTTP,      
       // defaultAction: default_group
-    }); */
+    }); 
     
     // listener.addAction(`RedirectHttpListener-for-${projectName}`, {
     //   action: default_action,
@@ -321,11 +317,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   port: targetPort
     // })
 
- /*   listener.addTargets(`WebEc2Target-for-${projectName}`, {
+    listener.addTargets(`WebEc2Target-for-${projectName}`, {
       targets,
       protocol: elbv2.ApplicationProtocol.HTTP,
       port: targetPort
-    }) */
+    }) 
 
 
 
@@ -338,11 +334,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   action: elbv2.ListenerAction.redirect()
     // });
 
-  /*  new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
+    new cdk.CfnOutput(this, `albUrl-for-${projectName}`, {
       value: `http://${alb.loadBalancerDnsName}/`,
       description: 'albUrl',
       exportName: 'albUrl',
-    });  */
+    });  
     
  /*   new cdk.CfnOutput(this, `WebUrl-for-${projectName}`, {
       value: 'https://'+distribution.domainName+'/',      
