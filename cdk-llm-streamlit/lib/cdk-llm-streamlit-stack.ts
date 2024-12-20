@@ -119,9 +119,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // const userDataScript = fs.readFileSync(path.join(__dirname, 'userdata.sh'), 'utf8');
     // userData.addCommands(userDataScript);
     userData.addCommands(
-      'sudo yum install nginx',
-      'sudo service nginx start',
-      'git clone https://github.com/kyopark2014/llm-streamlit'
+      //'sudo yum install nginx',
+      //'sudo service nginx start',
+      //'git clone https://github.com/kyopark2014/llm-streamlit'
+      "sudo yum install nginx", 
+      "sudo service nginx start"
     );
 
     // set User Data
@@ -144,7 +146,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       },
       securityGroup: ec2Sg,
       role: ec2Role,
-      // userData: userData,
+      userData: userData,
       blockDevices: [{
         deviceName: '/dev/xvda',
         volume: ec2.BlockDeviceVolume.ebs(8, {
@@ -158,7 +160,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     appInstance.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
     // ALB Target
-  /*  const targets: elbv2_tg.InstanceTarget[] = new Array();
+    const targets: elbv2_tg.InstanceTarget[] = new Array();
     targets.push(new elbv2_tg.InstanceTarget(appInstance)); 
 
     // ALB SG
@@ -199,7 +201,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       value: `http://${alb.loadBalancerDnsName}/`,
       description: 'albUrl',
       exportName: 'albUrl',
-    });      */
+    });      
   }
 }
     // const cloudfront_distribution = cloudFront.Distribution(this, "StreamLitCloudFrontDistribution",
