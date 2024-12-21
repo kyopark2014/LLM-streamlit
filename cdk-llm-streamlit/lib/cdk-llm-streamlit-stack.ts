@@ -99,9 +99,10 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       'yum install nginx -y',
       'service nginx start',
       'yum install git python-pip -y',
+      'cd /home',
+      'git clone https://github.com/kyopark2014/llm-streamlit',
       'pip install pip --upgrade',
-      'pip install streamlit boto3',
-      'cd /home && git clone https://github.com/kyopark2014/llm-streamlit',
+      'pip install streamlit boto3',      
       'python3 -m venv venv',
       'source venv/bin/activate',
       `sh -c "cat <<EOF > /etc/systemd/system/streamlit.service
@@ -113,7 +114,7 @@ After=network-online.target
 User=ssm-user
 Group=ssm-user
 Restart=always
-ExecStart=/home/ssm-user/.local/bin/streamlit run /home/llm-streamlit/application/app.py
+ExecStart=/home/.local/bin/streamlit run /home/llm-streamlit/application/app.py
 
 [Install]
 WantedBy=multi-user.target
