@@ -94,12 +94,19 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // );
 
     const userData = ec2.UserData.forLinux();
-    const commands = [
-      'yum install nginx -y',
-      'service nginx start',
-      'yum install git python-pip -y',
-      'pip install pip --upgrade',            
-      `sh -c "cat <<EOF > /etc/systemd/system/streamlit.service
+
+    let commands;
+    if(targetPort == 80) {
+      commands = [
+        'yum install nginx -y',
+        'service nginx start',
+      ];
+    }
+    else if(targetPort == 8501) {
+      commands = [
+        'yum install git python-pip -y',
+        'pip install pip --upgrade',            
+        `sh -c "cat <<EOF > /etc/systemd/system/streamlit.service
 [Unit]
 Description=Streamlit
 After=network-online.target
@@ -113,11 +120,12 @@ ExecStart=/home/ec2-user/.local/bin/streamlit run /home/ec2-user/llm-streamlit/a
 [Install]
 WantedBy=multi-user.target
 EOF"`,
-      `runuser -l ec2-user -c 'cd && git clone https://github.com/kyopark2014/llm-streamlit'`,
-      `runuser -l ec2-user -c 'pip install streamlit boto3'`,
-      'systemctl enable streamlit.service',
-      'systemctl start streamlit'
-    ];
+        `runuser -l ec2-user -c 'cd && git clone https://github.com/kyopark2014/llm-streamlit'`,
+        `runuser -l ec2-user -c 'pip install streamlit boto3'`,
+        'systemctl enable streamlit.service',
+        'systemctl start streamlit'
+      ];
+
     userData.addCommands(...commands);
 
     // EC2 instance
