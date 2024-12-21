@@ -72,7 +72,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
         },
       ],
     }); 
-    // vpc.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
     // Ec2 Security Group
     const ec2Sg = new ec2.SecurityGroup(this, `ec2-sg-for-${projectName}`,
@@ -83,11 +82,11 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
         securityGroupName: `ec2-sg-for-${projectName}`,
       }
     );
-    // ec2Sg.addIngressRule(
-    //   ec2.Peer.anyIpv4(),
-    //   ec2.Port.tcp(22),
-    //   'SSH',
-    // );
+    ec2Sg.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(22),
+      'SSH',
+    );
     // ec2Sg.addIngressRule(
     //   ec2.Peer.anyIpv4(),
     //   ec2.Port.tcp(80),
@@ -95,34 +94,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // );
 
     const userData = ec2.UserData.forLinux();
-//     userData.addCommands(
-//       'yum install nginx -y',
-//       'service nginx start',
-//       'yum install git python-pip -y',
-//       'cd /local',
-//       'git clone https://github.com/kyopark2014/llm-streamlit',
-//       'pip install pip --upgrade',
-//       'pip install streamlit boto3',      
-//       'python3 -m venv venv',
-//       'source venv/bin/activate',
-//       `sh -c "cat <<EOF > /etc/systemd/system/streamlit.service
-// [Unit]
-// Description=Streamlit
-// After=network-online.target
-
-// [Service]
-// User=ec2-user
-// Group=ec2-user
-// Restart=always
-// ExecStart=/local/.local/bin/streamlit run /local/llm-streamlit/application/app.py
-
-// [Install]
-// WantedBy=multi-user.target
-// EOF"`,
-//       'systemctl enable streamlit.service',
-//       'systemctl start streamlit'
-//     );
-
     const commands = [
       'yum install nginx -y',
       'service nginx start',
@@ -142,21 +113,12 @@ ExecStart=/home/ec2-user/.local/bin/streamlit run /home/ec2-user/llm-streamlit/a
 [Install]
 WantedBy=multi-user.target
 EOF"`,
-      // 'cd /home && git clone https://github.com/kyopark2014/llm-streamlit',            
       `runuser -l ec2-user -c 'cd && git clone https://github.com/kyopark2014/llm-streamlit'`,
       `runuser -l ec2-user -c 'pip install streamlit boto3'`,
-      // `runuser -l ec2-user -c 'python3 -m venv venv'`,
-      // `runuser -l ec2-user -c 'source venv/bin/activate'`,
       'systemctl enable streamlit.service',
       'systemctl start streamlit'
     ];
-
     userData.addCommands(...commands);
-
-    // set User Data
-    // const userData = ec2.UserData.forLinux();
-    // const userDataScript = fs.readFileSync(path.join(__dirname, 'userdata.sh'), 'utf8');
-    // userData.addCommands(userDataScript);
 
     // EC2 instance
     const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
