@@ -111,8 +111,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
 // After=network-online.target
 
 // [Service]
-// User=ssm-user
-// Group=ssm-user
+// User=ec2-user
+// Group=ec2-user
 // Restart=always
 // ExecStart=/local/.local/bin/streamlit run /local/llm-streamlit/application/app.py
 
@@ -134,22 +134,22 @@ Description=Streamlit
 After=network-online.target
 
 [Service]
-User=ssm-user
-Group=ssm-user
+User=ec2-user
+Group=ec2-user
 Restart=always
-ExecStart=/home/ssm-user/.local/bin/streamlit run /home/ssm-user/llm-streamlit/application/app.py
+ExecStart=/home/ec2-user/.local/bin/streamlit run /home/ec2-user/llm-streamlit/application/app.py
 
 [Install]
 WantedBy=multi-user.target
 EOF"`,
-      'cd /home/ssm-user',
+      'cd /home/ec2-user',
       `sh -c "cat <<EOF > ./a.txt
 Test Message
 EOF"`,      
-      `runuser -l ssm-user -c 'cd && git clone https://github.com/kyopark2014/llm-streamlit'`,
-      `runuser -l ssm-user -c 'pip install streamlit boto3'`,
-      `runuser -l ssm-user -c 'python3 -m venv venv'`,
-      `runuser -l ssm-user -c 'source venv/bin/activate'`,
+      `runuser -l ec2-user -c 'cd && git clone https://github.com/kyopark2014/llm-streamlit'`,
+      `runuser -l ec2-user -c 'pip install streamlit boto3'`,
+      // `runuser -l ec2-user -c 'python3 -m venv venv'`,
+      // `runuser -l ec2-user -c 'source venv/bin/activate'`,
       'systemctl enable streamlit.service',
       'systemctl start streamlit'
     ];
