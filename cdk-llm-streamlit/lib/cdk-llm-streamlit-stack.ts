@@ -4,14 +4,6 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as elbv2_tg from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets'
-import * as cloudFront from 'aws-cdk-lib/aws-cloudfront';
-import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as autoscaling from 'aws-cdk-lib/aws-autoscaling'
-import { RedirectProtocol } from 'aws-cdk-lib/aws-s3';
-import * as apigwv2 from 'aws-cdk-lib/aws-apigatewayv2';
-import { HttpAlbIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 
 const projectName = `llm-streamlit`; 
 const region = process.env.CDK_DEFAULT_REGION;    
@@ -102,31 +94,6 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   'HTTP',
     // );
 
-    // const userData = ec2.UserData.forLinux({
-    //   shebang: '#!/usr/bash',
-    // })
-    // userData.addCommands(
-    //   'sudo yum install nginx',
-    //   'sudo service nginx start'
-    // )
-    // 'sudo yum install git python-pip -y',
-    //   'pip install pip --upgrade',
-    //   'pip install streamlit boto3',
-    //   'git clone https://github.com/kyopark2014/llm-streamlit',
-    //   'python3 -m venv venv',
-    //   'source venv/bin/activate'
-        
-    // const userData = ec2.UserData.forLinux();
-    // const userDataScript = fs.readFileSync(path.join(__dirname, 'userdata.sh'), 'utf8');
-    // userData.addCommands(userDataScript);
-    // userData.addCommands(
-    //   //'sudo yum install nginx',
-    //   //'sudo service nginx start',
-    //   //'git clone https://github.com/kyopark2014/llm-streamlit'
-    //   "sudo yum install nginx", 
-    //   "sudo service nginx start"
-    // );
-
     const userData = ec2.UserData.forLinux();
     userData.addCommands(
       'sudo yum install nginx -y',
@@ -157,7 +124,7 @@ EOF"`,
 
     // set User Data
     // const userData = ec2.UserData.forLinux();
-    // const userDataScript = fs.readFileSync(path.join(__dirname, 'install.sh'), 'utf8');
+    // const userDataScript = fs.readFileSync(path.join(__dirname, 'userdata.sh'), 'utf8');
     // userData.addCommands(userDataScript);
 
     // EC2 instance

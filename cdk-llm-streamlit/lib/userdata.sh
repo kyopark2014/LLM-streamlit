@@ -25,4 +25,4 @@ EOF"
 sudo systemctl enable streamlit.service
 
 sudo systemctl start streamlit
-sudo systemctl status streamlit -l
+# sudo systemctl status streamlit -l
