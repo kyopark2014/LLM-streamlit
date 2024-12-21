@@ -96,15 +96,15 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
 
     const userData = ec2.UserData.forLinux();
     userData.addCommands(
-      'sudo yum install nginx -y',
+      'yum install nginx -y',
       'service nginx start',
       'yum install git python-pip -y',
       'pip install pip --upgrade',
       'pip install streamlit boto3',
-      'cd && git clone https://github.com/kyopark2014/llm-streamlit',
+      'cd /home/ssm-user && git clone https://github.com/kyopark2014/llm-streamlit',
       'python3 -m venv venv',
       'source venv/bin/activate',
-      `sudo sh -c "cat <<EOF > /etc/systemd/system/streamlit.service
+      `sh -c "cat <<EOF > /etc/systemd/system/streamlit.service
 [Unit]
 Description=Streamlit
 After=network-online.target
@@ -118,8 +118,8 @@ ExecStart=/home/ssm-user/.local/bin/streamlit run /home/ssm-user/llm-streamlit/a
 [Install]
 WantedBy=multi-user.target
 EOF"`,
-      'sudo systemctl enable streamlit.service',
-      'sudo systemctl start streamlit'
+      'systemctl enable streamlit.service',
+      'systemctl start streamlit'
     );
 
     // set User Data
