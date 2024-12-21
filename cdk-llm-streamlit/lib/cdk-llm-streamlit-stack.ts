@@ -142,7 +142,7 @@ ExecStart=/home/ssm-user/.local/bin/streamlit run /home/ssm-user/llm-streamlit/a
 [Install]
 WantedBy=multi-user.target
 EOF"`,
-      'cd home/ssm-user',
+      'cd /home/ssm-user',
       `runuser -l ssm-user -c 'cd && git clone https://github.com/kyopark2014/llm-streamlit'`,
       `runuser -l ssm-user -c 'pip install streamlit boto3'`,
       `runuser -l ssm-user -c 'python3 -m venv venv'`,
