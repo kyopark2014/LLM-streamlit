@@ -135,8 +135,8 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // );
 
     const commands = [
-      'sudo yum install nginx',
-      'sudo service nginx start'
+      'yum install nginx',
+      'service nginx start'
     ];
     userData.addCommands(...commands);
 
