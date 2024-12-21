@@ -127,7 +127,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       'yum install nginx -y',
       'service nginx start',
       'yum install git python-pip -y',
-      'pip install pip --upgrade',            
+      'pip install pip --upgrade',  
       `sh -c "cat <<EOF > /etc/systemd/system/streamlit.service
 [Unit]
 Description=Streamlit
