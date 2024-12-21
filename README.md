@@ -1,4 +1,4 @@
-# Streamlit을 이용한 Application
+# Streamlit을 이용한 Application 배포
 
 여기서는 Streamlit을 https를 이용하기 위하여 CloudFront - ALB - EC2로 구성하는 방법을 설명합니다. 
 
