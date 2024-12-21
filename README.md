@@ -9,16 +9,6 @@
 ![image](https://github.com/user-attachments/assets/5303bdc1-4b69-4421-9fb8-148b1ba2828c)
 
 
-### htts로 streamlit 연결의 어려움
-
-ALB에 인증서를 추가해서 https 지원이 가능하나, 여기에서는 CloudFront와 API Gateway(http api)를 이용하여 https 방식의 streamlit 구현을 시도하였습니다. 그러나, CloudFront와 API Gateway (http api)는 websocket을 지원하지 않으므로 구현이 안되는것을 확인하였습니다. 
-
-- [Serverless Streamlit app on AWS with HTTPS](https://kawsaur.medium.com/serverless-streamlit-app-on-aws-with-https-b5e5ff889590)
-
-- [frontend_stack.py](https://github.com/kawsark/streamlit-serverless/blob/main/streamlit_serverless_app/frontend_stack.py)
-
-- [Running streamlit as a System Service](https://medium.com/@stevenjlm/running-streamlit-on-amazon-ec2-with-https-f20e38fffbe7)
-
 
 ### CDK 구현 코드
 
@@ -80,7 +70,7 @@ EOF"`,
 userData.addCommands(...commands);
 ```
 
-ALB와 EC2를 연결합니다.
+ALB와 EC2를 연결합니다.
 
 ```java
 const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
@@ -117,6 +107,17 @@ Streamlit의 동작 상태는 아래 명령어를 이용해 확인합니다.
 ```text
 sudo systemctl status streamlit -l
 ```
+
+### htts로 streamlit 연결의 어려움
+
+ALB에 인증서를 추가해서 https 지원이 가능하나, 여기에서는 CloudFront와 API Gateway(http api)를 이용하여 https 방식의 streamlit 구현을 시도하였습니다. 그러나, CloudFront와 API Gateway (http api)는 websocket을 지원하지 않으므로 구현이 안되는것을 확인하였습니다. 
+
+- [Serverless Streamlit app on AWS with HTTPS](https://kawsaur.medium.com/serverless-streamlit-app-on-aws-with-https-b5e5ff889590)
+
+- [frontend_stack.py](https://github.com/kawsark/streamlit-serverless/blob/main/streamlit_serverless_app/frontend_stack.py)
+
+- [Running streamlit as a System Service](https://medium.com/@stevenjlm/running-streamlit-on-amazon-ec2-with-https-f20e38fffbe7)
+
 
 
 ## Streamlit
