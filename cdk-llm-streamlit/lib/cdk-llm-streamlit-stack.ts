@@ -135,6 +135,7 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
       'yum install git python-pip -y',
       'pip install pip --upgrade',
       'pip install streamlit boto3',
+      'cd',
       'git clone https://github.com/kyopark2014/llm-streamlit'
     );
 
