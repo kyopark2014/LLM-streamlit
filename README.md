@@ -4,7 +4,7 @@
 
 ## System Architecture 
 
-이때의 Architecture는 아래와 같습니다. 
+이때의 Architecture는 아래와 같습니다. 여기서에서는 Streamlit이 설치된 EC2는 private subnet에 둬서 안전하게 관리합니다. 
 
 <img width="675" alt="image" src="https://github.com/user-attachments/assets/147eda56-6934-40d4-a0de-37a9828f2f65" />
 
@@ -80,19 +80,6 @@ EOF"`,
 userData.addCommands(...commands);
 ```
 
-EC2에는 [Console-EC2](https://us-west-2.console.aws.amazon.com/ec2/home?region=us-west-2#Instances:)에 접속하여 "app-for-llm-streamlit"를 선택한 후에 Connect - Sesseion Manager를 선택하여 접속합니다. github에서 app을 업데이트 한 경우에 아래 명령어로 업데이트 합니다. 
-
-```text
-sudo runuser -l ec2-user -c 'cd /home/ec2-user/llm-streamlit && git pull'
-```
-
-Streamlit의 동작 상태는 아래 명령어를 이용해 확인합니다.
-
-```text
-sudo systemctl status streamlit -l
-```
-
-
 ALB와 EC2를 연결합니다.
 
 ```java
@@ -118,6 +105,19 @@ listener.addTargets(`WebEc2Target-for-${projectName}`, {
   port: targetPort
 }) 
 ```
+
+EC2에는 [Console-EC2](https://us-west-2.console.aws.amazon.com/ec2/home?region=us-west-2#Instances:)에 접속하여 "app-for-llm-streamlit"를 선택한 후에 Connect - Sesseion Manager를 선택하여 접속합니다. github에서 app을 업데이트 한 경우에 아래 명령어로 업데이트 합니다. 
+
+```text
+sudo runuser -l ec2-user -c 'cd /home/ec2-user/llm-streamlit && git pull'
+```
+
+Streamlit의 동작 상태는 아래 명령어를 이용해 확인합니다.
+
+```text
+sudo systemctl status streamlit -l
+```
+
 
 ## Streamlit
 
