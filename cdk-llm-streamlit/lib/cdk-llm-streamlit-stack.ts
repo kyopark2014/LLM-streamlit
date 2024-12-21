@@ -115,16 +115,30 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   'git clone https://github.com/kyopark2014/llm-streamlit',
     //   'python3 -m venv venv',
     //   'source venv/bin/activate'
-    const userData = ec2.UserData.forLinux();
+    
+    
+    // const userData = ec2.UserData.forLinux();
     // const userDataScript = fs.readFileSync(path.join(__dirname, 'userdata.sh'), 'utf8');
     // userData.addCommands(userDataScript);
-    userData.addCommands(
-      //'sudo yum install nginx',
-      //'sudo service nginx start',
-      //'git clone https://github.com/kyopark2014/llm-streamlit'
-      "sudo yum install nginx", 
-      "sudo service nginx start"
-    );
+    // userData.addCommands(
+    //   //'sudo yum install nginx',
+    //   //'sudo service nginx start',
+    //   //'git clone https://github.com/kyopark2014/llm-streamlit'
+    //   "sudo yum install nginx", 
+    //   "sudo service nginx start"
+    // );
+
+    const userData = ec2.UserData.forLinux();
+    // userData.addCommands(
+    //   'sudo yum install nginx',
+    //   'sudo service nginx start',
+    // );
+
+    const commands = [
+      'sudo yum install nginx',
+      'sudo service nginx start'
+    ];
+    userData.addCommands(...commands);
 
     // set User Data
     // const userData = ec2.UserData.forLinux();
