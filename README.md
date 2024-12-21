@@ -8,26 +8,23 @@
 
 <img width="675" alt="image" src="https://github.com/user-attachments/assets/147eda56-6934-40d4-a0de-37a9828f2f65" />
 
-### htts로 streamlit 연결하기
 
-[Serverless Streamlit app on AWS with HTTPS](https://kawsaur.medium.com/serverless-streamlit-app-on-aws-with-https-b5e5ff889590)를 참조합니다. 이 repo를 보면 CloudFront뒤에 ALB를 놓고 포트를 80으로 열고 있습니다. [frontend_stack.py](https://github.com/kawsark/streamlit-serverless/blob/main/streamlit_serverless_app/frontend_stack.py)에서는 아래와 같이 origin을 정의합니다. 
+### htts로 streamlit 연결의 어려움
 
-```python
-origin=origins.LoadBalancerV2Origin(fargate_service.load_balancer, 
- protocol_policy=cloudfront.OriginProtocolPolicy.HTTP_ONLY, 
- http_port=80, 
- origin_path="/", 
- custom_headers = { custom_header_name : custom_header_value } ),
-```
+ALB에 인증서를 추가해서 https 지원이 가능하나, 여기에서는 CloudFront와 API Gateway(http api)를 이용하여 https 방식의 streamlit 구현을 시도하였습니다. 그러나, CloudFront와 API Gateway (http api)는 websocket을 지원하지 않으므로 구현이 안되는것을 확인하였습니다. 
 
-[Running streamlit as a System Service](https://medium.com/@stevenjlm/running-streamlit-on-amazon-ec2-with-https-f20e38fffbe7)와 같이 service로 사용합니다.
+- [Serverless Streamlit app on AWS with HTTPS](https://kawsaur.medium.com/serverless-streamlit-app-on-aws-with-https-b5e5ff889590)
 
-### LB - EC2 연결 예제
+- [frontend_stack.py](https://github.com/kawsark/streamlit-serverless/blob/main/streamlit_serverless_app/frontend_stack.py)
 
-이때의 CDK는 아래와 같이 구성합니다.
+- [Running streamlit as a System Service](https://medium.com/@stevenjlm/running-streamlit-on-amazon-ec2-with-https-f20e38fffbe7)
+
+
+### CDK 구현 코드
+
+EC2를 아래와 같이 정의합니다. 
 
 ```java
-// EC2 instance
 const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
     instanceName: `app-for-${projectName}`,
     instanceType: new ec2.InstanceType('t2.small'), // m5.large
@@ -36,7 +33,7 @@ const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
     }),
     vpc: vpc,
     vpcSubnets: {
-        subnets: vpc.publicSubnets  // vpc.privateSubnets
+        subnets: vpc.privateSubnets 
     },
     securityGroup: ec2Sg,
     role: ec2Role,
@@ -52,24 +49,74 @@ const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
     instanceInitiatedShutdownBehavior: ec2.InstanceInitiatedShutdownBehavior.TERMINATE,
 });
 appInstance.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
+```
 
-const targets: elbv2_tg.InstanceTarget[] = new Array();
-targets.push(new elbv2_tg.InstanceTarget(appInstance));
+EC2의 userdata는 아래와 같이 설정합니다.
 
-const nlb = new elbv2.NetworkLoadBalancer(this, `nlb-for-${projectName}`, {
-    vpc,
-    loadBalancerName: `nlb-for-${projectName}`
-});
+```java
+commands = [
+ 'yum install git python-pip -y',
+ 'pip install pip --upgrade',            
+ `sh -c "cat <<EOF > /etc/systemd/system/streamlit.service
+[Unit]
+Description=Streamlit
+After=network-online.target
 
-const listener = nlb.addListener(`listener-${projectName}`, { port: 80 });
-listener.addTargets('target', {
-    targets,
-    port: 80,
-});
+[Service]
+User=ec2-user
+Group=ec2-user
+Restart=always
+ExecStart=/home/ec2-user/.local/bin/streamlit run /home/ec2-user/llm-streamlit/application/app.py
 
-const httpEndpoint = new apigatewayv2.HttpApi(this, 'HttpProxyPrivateApi', {
-    defaultIntegration: new apigatewayv2_integrations.HttpNlbIntegration('DefaultIntegration', listener),
-});
+[Install]
+WantedBy=multi-user.target
+EOF"`,
+ `runuser -l ec2-user -c 'cd && git clone https://github.com/kyopark2014/llm-streamlit'`,
+ `runuser -l ec2-user -c 'pip install streamlit boto3'`,
+ 'systemctl enable streamlit.service',
+ 'systemctl start streamlit'
+];
+
+userData.addCommands(...commands);
+```
+
+EC2에는 [Console-EC2](https://us-west-2.console.aws.amazon.com/ec2/home?region=us-west-2#Instances:)에 접속하여 "app-for-llm-streamlit"를 선택한 후에 Connect - Sesseion Manager를 선택하여 접속합니다. github에서 app을 업데이트 한 경우에 아래 명령어로 업데이트 합니다. 
+
+```text
+sudo runuser -l ec2-user -c 'cd /home/ec2-user/llm-streamlit && git pull'
+```
+
+Streamlit의 동작 상태는 아래 명령어를 이용해 확인합니다.
+
+```text
+sudo systemctl status streamlit -l
+```
+
+
+ALB와 EC2를 연결합니다.
+
+```java
+const alb = new elbv2.ApplicationLoadBalancer(this, `alb-for-${projectName}`, {
+  internetFacing: true,
+  vpc: vpc,
+  vpcSubnets: {
+    subnets: vpc.publicSubnets
+  },
+  securityGroup: albSg,
+  loadBalancerName: `alb-for-${projectName}`
+})
+alb.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
+
+const listener = alb.addListener(`HttpListener-for-${projectName}`, {   
+  port: 80,
+  protocol: elbv2.ApplicationProtocol.HTTP,      
+}); 
+
+listener.addTargets(`WebEc2Target-for-${projectName}`, {
+  targets,
+  protocol: elbv2.ApplicationProtocol.HTTP,
+  port: targetPort
+}) 
 ```
 
 ## Streamlit
