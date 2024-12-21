@@ -127,20 +127,38 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     //   "sudo service nginx start"
     // );
 
-    // const userData = ec2.UserData.forLinux();
-    // userData.addCommands(
-    //   'sudo yum install nginx -y',
-    //   'service nginx start',
-    //   'yum install git python-pip -y',
-    //   'pip install pip --upgrade',
-    //   'pip install streamlit boto3',
-    //   'cd && git clone https://github.com/kyopark2014/llm-streamlit'
-    // );
+    const userData = ec2.UserData.forLinux();
+    userData.addCommands(
+      'sudo yum install nginx -y',
+      'service nginx start',
+      'yum install git python-pip -y',
+      'pip install pip --upgrade',
+      'pip install streamlit boto3',
+      'cd && git clone https://github.com/kyopark2014/llm-streamlit',
+      'python3 -m venv venv',
+      'source venv/bin/activate',
+      `sudo sh -c "cat <<EOF > /etc/systemd/system/streamlit.service
+[Unit]
+Description=Streamlit
+After=network-online.target
+
+[Service]
+User=ssm-user
+Group=ssm-user
+Restart=always
+ExecStart=/home/ssm-user/.local/bin/streamlit run /home/ssm-user/llm-streamlit/application/app.py
+
+[Install]
+WantedBy=multi-user.target
+EOF"`,
+      'sudo systemctl enable streamlit.service',
+      'sudo systemctl start streamlit'
+    );
 
     // set User Data
-    const userData = ec2.UserData.forLinux();
-    const userDataScript = fs.readFileSync(path.join(__dirname, 'install.sh'), 'utf8');
-    userData.addCommands(userDataScript);
+    // const userData = ec2.UserData.forLinux();
+    // const userDataScript = fs.readFileSync(path.join(__dirname, 'install.sh'), 'utf8');
+    // userData.addCommands(userDataScript);
 
     // EC2 instance
     const appInstance = new ec2.Instance(this, `app-for-${projectName}`, {
