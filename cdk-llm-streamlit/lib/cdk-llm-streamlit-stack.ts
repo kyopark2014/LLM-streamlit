@@ -137,16 +137,13 @@ After=network-online.target
 User=ec2-user
 Group=ec2-user
 Restart=always
-ExecStart=/home/ec2-user/.local/bin/streamlit run /home/ec2-user/llm-streamlit/application/app.py
+ExecStart=/home/ec2-user/.local/bin/streamlit run /home/llm-streamlit/application/app.py
 
 [Install]
 WantedBy=multi-user.target
 EOF"`,
-      'cd /home/ec2-user',
-      `sh -c "cat <<EOF > ./a.txt
-Test Message
-EOF"`,      
-      `runuser -l ec2-user -c 'cd && git clone https://github.com/kyopark2014/llm-streamlit'`,
+      `cd /home && git clone https://github.com/kyopark2014/llm-streamlit'`,
+      // `runuser -l ec2-user -c 'cd && git clone https://github.com/kyopark2014/llm-streamlit'`,
       `runuser -l ec2-user -c 'pip install streamlit boto3'`,
       // `runuser -l ec2-user -c 'python3 -m venv venv'`,
       // `runuser -l ec2-user -c 'source venv/bin/activate'`,
