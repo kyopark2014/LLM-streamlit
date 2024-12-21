@@ -95,16 +95,39 @@ export class CdkLlmStreamlitStack extends cdk.Stack {
     // );
 
     const userData = ec2.UserData.forLinux();
-    userData.addCommands(
+//     userData.addCommands(
+//       'yum install nginx -y',
+//       'service nginx start',
+//       'yum install git python-pip -y',
+//       'cd /local',
+//       'git clone https://github.com/kyopark2014/llm-streamlit',
+//       'pip install pip --upgrade',
+//       'pip install streamlit boto3',      
+//       'python3 -m venv venv',
+//       'source venv/bin/activate',
+//       `sh -c "cat <<EOF > /etc/systemd/system/streamlit.service
+// [Unit]
+// Description=Streamlit
+// After=network-online.target
+
+// [Service]
+// User=ssm-user
+// Group=ssm-user
+// Restart=always
+// ExecStart=/local/.local/bin/streamlit run /local/llm-streamlit/application/app.py
+
+// [Install]
+// WantedBy=multi-user.target
+// EOF"`,
+//       'systemctl enable streamlit.service',
+//       'systemctl start streamlit'
+//     );
+
+    const commands = [
       'yum install nginx -y',
       'service nginx start',
       'yum install git python-pip -y',
-      'cd /local',
-      'git clone https://github.com/kyopark2014/llm-streamlit',
-      'pip install pip --upgrade',
-      'pip install streamlit boto3',      
-      'python3 -m venv venv',
-      'source venv/bin/activate',
+      'pip install pip --upgrade',            
       `sh -c "cat <<EOF > /etc/systemd/system/streamlit.service
 [Unit]
 Description=Streamlit
@@ -114,14 +137,20 @@ After=network-online.target
 User=ssm-user
 Group=ssm-user
 Restart=always
-ExecStart=/local/.local/bin/streamlit run /local/llm-streamlit/application/app.py
+ExecStart=/home/ssm-user/.local/bin/streamlit run /home/ssm-user/llm-streamlit/application/app.py
 
 [Install]
 WantedBy=multi-user.target
 EOF"`,
+      `runuser -l ssm-user -c 'cd && git clone https://github.com/kyopark2014/llm-streamlit'`,
+      `runuser -l ssm-user -c 'pip install streamlit boto3'`,
+      `runuser -l ssm-user -c 'python3 -m venv venv'`,
+      `runuser -l ssm-user -c 'source venv/bin/activate'`,
       'systemctl enable streamlit.service',
       'systemctl start streamlit'
-    );
+    ];
+
+    userData.addCommands(...commands);
 
     // set User Data
     // const userData = ec2.UserData.forLinux();
